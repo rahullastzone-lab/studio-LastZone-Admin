@@ -1,0 +1,178 @@
+rules_version = '2';
+
+/**
+ * @fileoverview Firestore Security Rules for the LastZone Platform
+ * @author aifirebase.com
+ *
+ * @description
+ * This ruleset enforces a security model with two primary roles: standard users and administrators.
+ * The core philosophy is to grant users control over their own data while giving administrators
+ * comprehensive oversight and management capabilities over global game data and financial records.
+ *
+ * Core Philosophy:
+ * - User Ownership: Users have full control over their personal profile and their registrations for matches.
+ * - Admin Supremacy: Users with an `isAdmin: true` flag in their profile have elevated privileges to manage all data, including tournaments, transactions, and user profiles.
+ * - Public Read, Admin Write: Core game data like tournaments are publicly visible to all users, but can only be created or modified by administrators.
+ * - Secure by Default: Access is denied by default. Permissions are explicitly granted. Listing collections containing private user data is disabled for non-admins to prevent data leakage.
+ *
+ * Data Structure:
+ * The data is organized into top-level collections for clear separation of concerns:
+ * - `/profiles/{profileId}`: Stores user-specific data, with the document ID matching the user's Auth UID. Contains the critical `isAdmin` flag.
+ * - `/tournaments/{tournamentId}`: Publicly accessible tournament information.
+ * - `/match_registrations/{registrationId}`: User-created registrations for tournaments.
+ * - `/transactions/{transactionId}`: Financial records, managed by admins.
+ * - `/withdrawals/{withdrawalId}`: User-initiated withdrawal requests, managed by admins.
+ *
+ * Key Security Decisions:
+ * - Admin Role Check: An `isAdmin()` helper function performs a `get` request to the user's own profile to check for the `isAdmin` flag. This is the central mechanism for role-based access control.
+ * - No User Enumeration: The ability to `list` the `/profiles` and other user-centric collections is restricted to admins to protect user privacy.
+ * - Immutable Ownership: Fields linking a document to a user (e.g., `userId`) are immutable after creation to maintain clear and permanent ownership records.
+ * - Prototyping Flexibility: These rules focus strictly on authorization (who can access what) and relational integrity. They do not validate the specific shape or data types of documents, allowing for rapid front-end development and iteration.
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------------
+    // Helper Functions
+    // ------------------------------------------------------------------------
+
+    /**
+     * Returns true if the user is signed in.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Returns true if the request is from a user whose UID matches the given userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Returns true if the document being updated or deleted already exists.
+     * Prevents modifying or deleting non-existent data.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+    
+    /**
+     * Returns true if the signed-in user is an administrator.
+     * This requires a read to the user's own profile document.
+     */
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    /**
+     * Checks ownership of a document via an internal `userId` field.
+     */
+    function isOwnerOfDoc(doc) {
+      return isSignedIn() && request.auth.uid == doc.userId;
+    }
+
+    /**
+     * Validates that a user is creating a document for themselves.
+     * Ensures the `userId` field in the new document matches the creator's UID.
+     */
+    function isCreatingForSelf() {
+      return isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    /**
+     * Validates that the critical `userId` field is not being changed on an update.
+     */
+    function isUserIdImmutable() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * Prevents a non-admin user from granting themselves admin privileges.
+     * Allows an admin to change another user's status.
+     */
+    function isNotSelfPromoting() {
+      return !('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin;
+    }
+
+    // ------------------------------------------------------------------------
+    // Collection Rules
+    // ------------------------------------------------------------------------
+
+    /**
+     * @description Manages user profiles. A user can create and manage their own profile. Admins have full access.
+     * @path /profiles/{profileId}
+     * @allow (get) An authenticated user reads their own profile (`profileId` matches their UID).
+     * @deny (list) A regular user attempts to list all profiles in the database.
+     * @principle Restricts access to a user's own data tree and grants admins full control.
+     */
+    match /profiles/{profileId} {
+      allow get: if isOwner(profileId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(profileId);
+      allow update: if (isOwner(profileId) && isExistingDoc() && isNotSelfPromoting()) || (isAdmin() && isExistingDoc());
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Manages tournaments. This data is public for all to read, but only admins can modify it.
+     * @path /tournaments/{tournamentId}
+     * @allow (get) Any user, signed in or not, can read tournament details.
+     * @deny (create) A regular, non-admin user tries to create a new tournament.
+     * @principle Enforces a "Public Read with Admin-Only Writes" model.
+     */
+    match /tournaments/{tournamentId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Manages user registrations for tournaments. Users can create and manage their own registrations.
+     * @path /match_registrations/{matchRegistrationId}
+     * @allow (create) An authenticated user creates a registration for themselves, setting the `userId` field correctly.
+     * @deny (update) A user tries to change the `userId` of an existing registration to someone else.
+     * @principle Enforces document ownership for writes and validates relational integrity on creation.
+     */
+    match /match_registrations/{matchRegistrationId} {
+      allow get: if (isExistingDoc() && isOwnerOfDoc(resource.data)) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isCreatingForSelf();
+      allow update: if (isExistingDoc() && isOwnerOfDoc(resource.data) && isUserIdImmutable()) || (isExistingDoc() && isAdmin());
+      allow delete: if (isExistingDoc() && isOwnerOfDoc(resource.data)) || (isExistingDoc() && isAdmin());
+    }
+
+    /**
+     * @description Manages financial transactions. Only admins can create or modify transactions. Users can read their own.
+     * @path /transactions/{transactionId}
+     * @allow (get) An authenticated user reads a transaction document where the `userId` field matches their UID.
+     * @deny (create) A regular user attempts to create a transaction record.
+     * @principle Secures financial data by restricting writes to admins and reads to the document owner.
+     */
+    match /transactions/{transactionId} {
+      allow get: if (isExistingDoc() && isOwnerOfDoc(resource.data)) || isAdmin();
+      allow list: if isAdmin(); // Users must use queries with `where("userId", "==", uid)` to get their data.
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Manages user withdrawal requests. Users can create requests, but only admins can modify them.
+     * @path /withdrawals/{withdrawalId}
+     * @allow (create) An authenticated user creates a withdrawal request for themselves.
+     * @deny (update) A user attempts to change the status of their own pending withdrawal request.
+     * @principle Allows user-initiated creation but centralizes state changes (e.g., approval) with admins.
+     */
+    match /withdrawals/{withdrawalId} {
+      allow get: if (isExistingDoc() && isOwnerOfDoc(resource.data)) || isAdmin();
+      allow list: if isAdmin(); // Users must use queries with `where("userId", "==", uid)` to get their data.
+      allow create: if isCreatingForSelf();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+  }
+}

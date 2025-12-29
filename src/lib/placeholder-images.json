@@ -1,0 +1,52 @@
+{
+  "placeholderImages": [
+    {
+      "id": "admin-avatar",
+      "description": "Avatar for the admin user.",
+      "imageUrl": "https://images.unsplash.com/photo-1529995049601-ef63465a463f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9maWxlJTIwcGVyc29ufGVufDB8fHx8MTc2NjI5MDY4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "profile person"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Avatar for a sample user.",
+      "imageUrl": "https://images.unsplash.com/photo-1535223289827-42f1e9919769?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxnYW1lcnxlbnwwfHx8fDE3NjYyOTU0NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gamer"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Avatar for another sample user.",
+      "imageUrl": "https://images.unsplash.com/photo-1664575602554-2087b04935a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3b21hbnxlbnwwfHx8fDE3NjYyOTI4NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman"
+    },
+    {
+      "id": "user-avatar-3",
+      "description": "Avatar for a third sample user.",
+      "imageUrl": "https://images.unsplash.com/photo-1759709867188-7d94e0041de2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxlc3BvcnRzJTIwcGxheWVyfGVufDB8fHx8MTc2NjI5NTQ1MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "esports player"
+    },
+    {
+      "id": "user-avatar-4",
+      "description": "Avatar for a fourth sample user.",
+      "imageUrl": "https://images.unsplash.com/photo-1762288045707-dfd64fe6eb4b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtYW4lMjB3ZWFyaW5nJTIwaGVhZHBob25lc3xlbnwwfHx8fDE3NjYyOTU0NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man wearing headphones"
+    },
+    {
+      "id": "banner-1",
+      "description": "Esports tournament banner.",
+      "imageUrl": "https://images.unsplash.com/photo-1558008258-7ff8888b42b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxlc3BvcnRzJTIwdG91cm5hbWVudHxlbnwwfHx8fDE3NjYyNjIyMDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "esports tournament"
+    },
+    {
+      "id": "banner-2",
+      "description": "Gaming action banner.",
+      "imageUrl": "https://images.unsplash.com/photo-1760604359369-45675611f750?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBhY3Rpb258ZW58MHx8fHwxNzY2Mjk1NDUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gaming action"
+    },
+    {
+      "id": "banner-3",
+      "description": "Promotional gaming banner.",
+      "imageUrl": "https://images.unsplash.com/photo-1582806346149-1069ab0951db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z2FtaW5nJTIwcHJvbW90aW9ufGVufDB8fHx8MTc2NjI5NTQ1MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gaming promotion"
+    }
+  ]
+}

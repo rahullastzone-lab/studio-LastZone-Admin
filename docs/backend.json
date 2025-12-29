@@ -1,0 +1,312 @@
+{
+  "entities": {
+    "Profile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Profile",
+      "type": "object",
+      "description": "Represents a user profile in the LastZone platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Profile entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "The phone number of the user."
+        },
+        "avatarUrl": {
+          "type": "string",
+          "description": "URL of the user's avatar image.",
+          "format": "uri"
+        },
+        "walletBalance": {
+          "type": "number",
+          "description": "The user's wallet balance."
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Indicates if the user is an administrator."
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "email",
+        "walletBalance",
+        "isAdmin"
+      ]
+    },
+    "Tournament": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tournament",
+      "type": "object",
+      "description": "Represents a tournament in the LastZone platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Tournament entity."
+        },
+        "gameType": {
+          "type": "string",
+          "description": "The type of game for the tournament (e.g., BGMI, FreeFire)."
+        },
+        "map": {
+          "type": "string",
+          "description": "The map used in the tournament (e.g., Erangel, Livik)."
+        },
+        "mode": {
+          "type": "string",
+          "description": "The mode of the tournament (e.g., Solo, Duo, Squad)."
+        },
+        "entryFee": {
+          "type": "number",
+          "description": "The entry fee for the tournament."
+        },
+        "prizePool": {
+          "type": "number",
+          "description": "The total prize pool for the tournament."
+        },
+        "perKill": {
+          "type": "number",
+          "description": "The reward per kill in the tournament."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "The start time of the tournament.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the tournament (e.g., Open, Closed, Completed)."
+        },
+        "roomId": {
+          "type": "string",
+          "description": "The ID of the room for the tournament."
+        },
+        "roomPassword": {
+          "type": "string",
+          "description": "The password for the tournament room."
+        }
+      },
+      "required": [
+        "id",
+        "gameType",
+        "map",
+        "mode",
+        "entryFee",
+        "prizePool",
+        "perKill",
+        "startTime",
+        "status",
+        "roomId",
+        "roomPassword"
+      ]
+    },
+    "MatchRegistration": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MatchRegistration",
+      "type": "object",
+      "description": "Represents a user's registration for a specific tournament.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MatchRegistration entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N MatchRegistration)"
+        },
+        "tournamentId": {
+          "type": "string",
+          "description": "Reference to Tournament. (Relationship: Tournament 1:N MatchRegistration)"
+        },
+        "gameUsername": {
+          "type": "string",
+          "description": "The user's in-game name for the tournament."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "tournamentId",
+        "gameUsername"
+      ]
+    },
+    "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transaction",
+      "type": "object",
+      "description": "Represents a financial transaction in the LastZone platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Transaction entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Transaction)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the transaction."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of transaction (e.g., Deposit, Withdrawal, Refund, Winnings, Entry Fee)."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the transaction (e.g., Pending, Success, Failed)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The timestamp when the transaction was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "amount",
+        "type",
+        "status",
+        "createdAt"
+      ]
+    },
+    "Withdrawal": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Withdrawal",
+      "type": "object",
+      "description": "Represents a user's withdrawal request.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Withdrawal entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Withdrawal)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the withdrawal."
+        },
+        "upiId": {
+          "type": "string",
+          "description": "The UPI ID for the withdrawal."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the withdrawal (e.g., Pending, Approved, Rejected)."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "amount",
+        "upiId",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/profiles/{profileId}",
+        "definition": {
+          "entityName": "Profile",
+          "schema": {
+            "$ref": "#/backend/entities/Profile"
+          },
+          "description": "Stores user profile information, including `isAdmin` status for authorization. The `profileId` is the same as the `userId` from Firebase Authentication.",
+          "params": [
+            {
+              "name": "profileId",
+              "description": "The unique identifier for the user's profile, matching the Firebase Auth UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tournaments/{tournamentId}",
+        "definition": {
+          "entityName": "Tournament",
+          "schema": {
+            "$ref": "#/backend/entities/Tournament"
+          },
+          "description": "Stores tournament details. Write access is restricted to admins.",
+          "params": [
+            {
+              "name": "tournamentId",
+              "description": "The unique identifier for the tournament."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/match_registrations/{matchRegistrationId}",
+        "definition": {
+          "entityName": "MatchRegistration",
+          "schema": {
+            "$ref": "#/backend/entities/MatchRegistration"
+          },
+          "description": "Stores match registration details.  Write access is restricted to authenticated users and admins. Includes `userId` and `tournamentId` for relation management.",
+          "params": [
+            {
+              "name": "matchRegistrationId",
+              "description": "The unique identifier for the match registration."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/transactions/{transactionId}",
+        "definition": {
+          "entityName": "Transaction",
+          "schema": {
+            "$ref": "#/backend/entities/Transaction"
+          },
+          "description": "Stores transaction details. Write access is restricted to admins. Includes `userId` for relation management.",
+          "params": [
+            {
+              "name": "transactionId",
+              "description": "The unique identifier for the transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/withdrawals/{withdrawalId}",
+        "definition": {
+          "entityName": "Withdrawal",
+          "schema": {
+            "$ref": "#/backend/entities/Withdrawal"
+          },
+          "description": "Stores withdrawal requests.  Write access is restricted to admins. Includes `userId` for relation management.",
+          "params": [
+            {
+              "name": "withdrawalId",
+              "description": "The unique identifier for the withdrawal request."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the LastZone esports platform and its admin HQ, focusing on authorization independence, clarity, and scalability. The structure adheres to the principles outlined in the design strategy, prioritizing denormalization to avoid hierarchical authorization dependencies. \n\n*Authorization Independence*: Achieved by denormalizing relevant authorization data (e.g., 'isAdmin' status) into documents where access control is required. Specifically, the `profiles` collection stores `isAdmin` status, which can be used in rules without needing to fetch other documents.\n\n*Structural Segregation*: Different data types with varying access requirements are stored in separate collections. User-owned data is nested under `/users/{userId}`, while global data like `/tournaments` and `/withdrawals` are stored at the top level.\n\n*Access Modeling*: Path-based ownership (`/users/{userId}/...`) is used for private user data.  Global roles (admin) are stored directly in the `profiles` collection and checked for authorization.\n\n*QAPs (Rules Are Not Filters)*: List operations are secured by structure. For example, listing tournaments is always allowed, but write access is restricted based on admin status.\n\n*Invariants*: Enforced through security rules to ensure data integrity (e.g., only admins can modify tournament details).\n\nThis structure enables efficient and secure data access while maintaining a clear and debuggable security model."
+  }
+}
