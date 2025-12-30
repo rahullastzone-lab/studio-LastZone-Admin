@@ -9,7 +9,6 @@ import {
 import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export default function DashboardLayout({
   children,
@@ -32,17 +31,15 @@ export default function DashboardLayout({
   }
 
   return (
-    <FirebaseClientProvider>
-      <SidebarProvider>
-        <Sidebar>
-          <AppSidebar />
-        </Sidebar>
-        <SidebarInset>
-          <Header />
-          <main className="p-4 lg:p-6">{children}</main>
-          <Toaster />
-        </SidebarInset>
-      </SidebarProvider>
-    </FirebaseClientProvider>
+    <SidebarProvider>
+      <Sidebar>
+        <AppSidebar />
+      </Sidebar>
+      <SidebarInset>
+        <Header />
+        <main className="p-4 lg:p-6">{children}</main>
+        <Toaster />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
