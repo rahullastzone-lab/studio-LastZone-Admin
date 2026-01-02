@@ -72,12 +72,17 @@ export default function TournamentsPage() {
         title="Tournaments"
         description="Manage all esports tournaments."
       >
-        <Button asChild>
-          <Link href="/tournaments/create">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Tournament
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" disabled>
+            Coming Soon
+          </Button>
+          <Button asChild>
+            <Link href="/tournaments/create">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Tournament
+            </Link>
+          </Button>
+        </div>
       </PageHeader>
       <TournamentsClient data={data} />
     </div>

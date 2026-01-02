@@ -49,6 +49,7 @@ export type NotificationSubscription = {
   email: string;
   whatsappNumber: string;
   interest: string;
+  serviceName: string; // The specific service (e.g., 'BGMI UC', 'Mobile Recharge')
   createdAt: string;
 };
 
@@ -155,6 +156,12 @@ const interests = [
   'BGMI',
   'FreeFire',
   'COD Mobile',
+  'BGMI UC',
+  'FREE FIRE DIAMONDS', // Testing uppercase
+  'COD MOBILE CP',
+  'MOBILE RECHARGE',
+  'GIFT CARDS',
+  'SHOP',
   'In-Game Service',
   'Mega Tournament',
   'BGMI ID Sell',
@@ -169,15 +176,28 @@ export const mockSubscriptions: NotificationSubscription[] = generateMockData((i
   const user = userChoices[i % userChoices.length];
   const baseDate = new Date('2024-07-20T00:00:00.000Z').getTime();
   const randomTimeOffset = Math.random() * 10 * 24 * 60 * 60 * 1000;
+
+  const rawInterest = interests[i % interests.length];
+  let category = 'Mega Tournament';
+
+  if (['BGMI UC', 'Free Fire Diamonds', 'COD Mobile CP', 'Mobile Recharge', 'Gift Cards', 'Shop'].includes(rawInterest)) {
+    category = 'In-Game Service';
+  } else if (rawInterest.includes('ID Sell') || rawInterest.includes('ID Buy')) {
+    category = rawInterest; // Marketplace keeps specific category
+  } else {
+    category = rawInterest;
+  }
+
   return {
     id: `sub_${i + 1}`,
     name: user.username,
     email: user.email,
     whatsappNumber: user.phone || 'N/A',
-    interest: interests[i % interests.length],
+    interest: category,
+    serviceName: rawInterest,
     createdAt: new Date(baseDate + randomTimeOffset).toISOString(),
   };
-}, 25);
+}, 50);
 
 
 export const mockWithdrawals: Withdrawal[] = generateMockData((i) => {

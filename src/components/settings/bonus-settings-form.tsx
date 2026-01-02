@@ -63,9 +63,10 @@ export function BonusSettingsForm() {
             }
         } catch (error: any) {
             console.error('Error fetching bonus settings:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
             toast({
                 title: "Error fetching bonus settings",
-                description: error.message,
+                description: error.message || "Unknown error occurred",
                 variant: "destructive"
             });
         } finally {

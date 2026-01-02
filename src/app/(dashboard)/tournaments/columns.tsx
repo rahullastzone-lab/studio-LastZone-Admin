@@ -1,20 +1,10 @@
-'use client';
-
 import { type ColumnDef } from '@tanstack/react-table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, MoreHorizontal, Pencil, ClipboardList } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
 import type { Tournament as TournamentType } from '@/lib/data';
 import ClientDate from '@/components/ui/client-date';
+import { TournamentActions } from './tournament-actions';
 
 export type Tournament = TournamentType;
 
@@ -80,7 +70,7 @@ export const columns: ColumnDef<Tournament>[] = [
     accessorKey: 'start_time',
     header: 'Start Time',
     cell: ({ row }) => {
-        return <ClientDate date={row.getValue('start_time')} formatString="PPpp" />;
+      return <ClientDate date={row.getValue('start_time')} formatString="PPpp" />;
     }
   },
   {
@@ -93,38 +83,6 @@ export const columns: ColumnDef<Tournament>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => {
-      const tournament = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(tournament.id)}
-            >
-              Copy Tournament ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Pencil className="mr-2 h-4 w-4" />
-              Update Room ID/Pass
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-                <Link href={`/tournaments/result-entry/${tournament.id}`}>
-                    <ClipboardList className="mr-2 h-4 w-4" />
-                    Manage Results
-                </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <TournamentActions tournament={row.original} />,
   },
 ];

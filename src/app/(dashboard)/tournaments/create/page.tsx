@@ -1,5 +1,7 @@
 'use client';
 
+import { Switch } from '@/components/ui/switch';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -54,6 +56,9 @@ const formSchema = z
     // Match details
     roomId: z.string().optional(),
     roomPassword: z.string().optional(),
+    // New fields
+    category: z.enum(['Normal', 'Mega']).default('Normal'),
+    is_coming_soon: z.boolean().default(false),
   });
 
 export default function CreateTournamentPage() {
@@ -71,6 +76,8 @@ export default function CreateTournamentPage() {
       start_time: '',
       roomId: '',
       roomPassword: '',
+      category: 'Normal',
+      is_coming_soon: false,
     },
   });
 
@@ -97,6 +104,8 @@ export default function CreateTournamentPage() {
           per_kill: values.per_kill,
           start_time: startTimeISO,
           status: 'Open',
+          category: values.category,
+          is_coming_soon: values.is_coming_soon,
         })
         .select()
         .single();
@@ -182,6 +191,52 @@ export default function CreateTournamentPage() {
                         />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tournament Category</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Normal">Normal</SelectItem>
+                          <SelectItem value="Mega">Mega</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_coming_soon"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Coming Soon</FormLabel>
+                        <div className="text-[0.8rem] text-muted-foreground">
+                          Mark this tournament as coming soon
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />

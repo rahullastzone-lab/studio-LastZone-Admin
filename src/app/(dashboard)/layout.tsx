@@ -1,45 +1,37 @@
-'use client';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import DashboardLayoutClient from '@/components/layout/dashboard-layout-client';
 
-import React, { useState, useEffect } from 'react';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-} from '@/components/ui/sidebar';
-import AppSidebar from '@/components/layout/app-sidebar';
-import Header from '@/components/layout/header';
-import { Toaster } from '@/components/ui/toaster';
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isClient, setIsClient] = useState(false);
+  const supabase = await createClient();
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!isClient) {
-    // Aap yahan ek loading spinner ya skeleton UI dikha sakte hain
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Check if user is admin
+  // We use .maybeSingle() to avoid error if profile doesn't exist yet (though it should)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    redirect('/login');
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <AppSidebar />
-      </Sidebar>
-      <SidebarInset>
-        <Header />
-        <main className="p-4 lg:p-6">{children}</main>
-        <Toaster />
-      </SidebarInset>
-    </SidebarProvider>
+    <DashboardLayoutClient>
+      {children}
+    </DashboardLayoutClient>
   );
 }

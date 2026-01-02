@@ -163,6 +163,17 @@ function DataTable<TData, TValue>({
   );
 }
 
+const extractMarketplaceCategory = (rawInterest: string) => {
+  const lower = rawInterest.toLowerCase();
+  if (lower.includes('bgmi') && lower.includes('id') && lower.includes('sell')) return 'BGMI ID Sell';
+  if (lower.includes('bgmi') && lower.includes('id') && lower.includes('buy')) return 'BGMI ID Buy';
+  if (lower.includes('free') && lower.includes('fire') && lower.includes('id') && lower.includes('sell')) return 'FreeFire ID Sell';
+  if (lower.includes('free') && lower.includes('fire') && lower.includes('id') && lower.includes('buy')) return 'FreeFire ID Buy';
+  if (lower.includes('cod') && lower.includes('id') && lower.includes('sell')) return 'COD Mobile ID Sell';
+  if (lower.includes('cod') && lower.includes('id') && lower.includes('buy')) return 'COD Mobile ID Buy';
+  return null;
+};
+
 export default function RegistrationsPage() {
   const [data, setData] = useState<NotificationSubscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -175,18 +186,46 @@ export default function RegistrationsPage() {
       try {
         const { data: subs, error } = await supabase
           .from('notify_subscribers')
-          .select('*, profiles(username, email)');
+          .select('*, profiles(username, email, phone, full_name)');
 
         if (error) throw error;
 
-        const mappedData: NotificationSubscription[] = (subs || []).map((s: any) => ({
-          id: s.id,
-          name: s.profiles?.username || 'Unknown',
-          email: s.profiles?.email || 'Unknown',
-          whatsappNumber: s.whatsapp_number || 'N/A',
-          interest: s.game_interest,
-          createdAt: s.created_at,
-        }));
+        const mappedData: NotificationSubscription[] = (subs || []).map((s: any) => {
+          const rawInterest = (s.game_interest || '').trim() || 'Unknown';
+          let interest = rawInterest;
+          const lowerInterest = rawInterest.toLowerCase();
+
+          // Normalize interest for Categorization (Tabs)
+          const inGameServices = ['bgmi uc', 'free fire diamonds', 'free fire diomonds', 'cod mobile cp', 'mobile recharge', 'gift cards', 'shop'];
+
+          if (inGameServices.some(s => lowerInterest.includes(s))) {
+            interest = 'In-Game Service';
+          } else if (lowerInterest.includes('mega') || lowerInterest.includes('tournament')) {
+            interest = 'Mega Tournament';
+          } else if (lowerInterest.includes('bgmi') && !lowerInterest.includes('uc') && !lowerInterest.includes('id')) {
+            interest = 'BGMI';
+          } else if (lowerInterest.includes('free') && lowerInterest.includes('fire') && !lowerInterest.includes('diamonds') && !lowerInterest.includes('diomonds') && !lowerInterest.includes('id')) {
+            interest = 'FreeFire';
+          } else if (lowerInterest.includes('cod') || lowerInterest.includes('call of duty') && !lowerInterest.includes('cp') && !lowerInterest.includes('id')) {
+            interest = 'COD Mobile';
+          } else if (lowerInterest.includes('service')) {
+            interest = 'In-Game Service';
+          } else if (extractMarketplaceCategory(rawInterest)) {
+            interest = extractMarketplaceCategory(rawInterest);
+          } else if (interest === 'Unknown') {
+            interest = 'Mega Tournament'; // Fallback
+          }
+
+          return {
+            id: s.id,
+            name: s.profiles?.username || s.guest_name || s.profiles?.full_name || 'Unknown',
+            email: s.profiles?.email || s.email || 'Unknown',
+            whatsappNumber: s.whatsapp_number || s.profiles?.phone || 'N/A',
+            interest: interest,
+            serviceName: rawInterest,
+            createdAt: s.created_at,
+          };
+        });
         setData(mappedData);
 
       } catch (error: any) {
@@ -208,6 +247,7 @@ export default function RegistrationsPage() {
     'COD Mobile',
     'In-Game Service',
     'Mega Tournament',
+    'General Market Access',
   ];
 
   const marketplaceInterests = [

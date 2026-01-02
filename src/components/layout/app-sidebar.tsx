@@ -22,6 +22,7 @@ import {
   FileText,
   UserPlus,
   Briefcase,
+  MonitorPlay,
 } from 'lucide-react';
 
 const AppSidebar = () => {
@@ -38,8 +39,9 @@ const AppSidebar = () => {
     { href: '/games', label: 'Games', icon: Gamepad2 },
     { href: '/market-items', label: 'Market Items', icon: Store },
     { href: '/policies', label: 'Policies', icon: FileText },
-    { href: '/registrations', label: 'Registrations', icon: UserPlus },
+    { href: '/registrations', label: 'Notify Subscribers', icon: UserPlus },
     { href: '/services', label: 'Services', icon: Briefcase },
+    { href: '/streams', label: 'Live Streams', icon: MonitorPlay },
   ];
 
   return (

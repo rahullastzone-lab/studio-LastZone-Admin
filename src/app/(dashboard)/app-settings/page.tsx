@@ -26,6 +26,18 @@ export default function AppSettingsPage() {
   const [supportEmail, setSupportEmail] = useState('');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
+  // Social Media State
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [facebookUrl, setFacebookUrl] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [discordUrl, setDiscordUrl] = useState('');
+
+
+  // Branding State
+  const [headerLogoUrl, setHeaderLogoUrl] = useState('');
+  const [footerLogoUrl, setFooterLogoUrl] = useState('');
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -41,6 +53,18 @@ export default function AppSettingsPage() {
           if (setting.setting_key === 'app_name') setAppName(setting.setting_value);
           if (setting.setting_key === 'support_email') setSupportEmail(setting.setting_value);
           if (setting.setting_key === 'maintenance_mode') setMaintenanceMode(setting.setting_value === 'true');
+
+          // Social Media
+          if (setting.setting_key === 'social_instagram') setInstagramUrl(setting.setting_value);
+          if (setting.setting_key === 'social_facebook') setFacebookUrl(setting.setting_value);
+          if (setting.setting_key === 'social_twitter') setTwitterUrl(setting.setting_value);
+          if (setting.setting_key === 'social_youtube') setYoutubeUrl(setting.setting_value);
+
+          if (setting.setting_key === 'social_discord') setDiscordUrl(setting.setting_value);
+
+          // Branding
+          if (setting.setting_key === 'logo_header') setHeaderLogoUrl(setting.setting_value);
+          if (setting.setting_key === 'logo_footer') setFooterLogoUrl(setting.setting_value);
         });
       }
     } catch (error: any) {
@@ -60,6 +84,18 @@ export default function AppSettingsPage() {
         { setting_key: 'app_name', setting_value: appName, description: 'Global Application Name' },
         { setting_key: 'support_email', setting_value: supportEmail, description: 'Contact Email for Support' },
         { setting_key: 'maintenance_mode', setting_value: String(maintenanceMode), description: 'Enable/Disable App Access' },
+
+        // Social Media
+        { setting_key: 'social_instagram', setting_value: instagramUrl, description: 'Instagram URL' },
+        { setting_key: 'social_facebook', setting_value: facebookUrl, description: 'Facebook URL' },
+        { setting_key: 'social_twitter', setting_value: twitterUrl, description: 'Twitter/X URL' },
+        { setting_key: 'social_youtube', setting_value: youtubeUrl, description: 'YouTube URL' },
+
+        { setting_key: 'social_discord', setting_value: discordUrl, description: 'Discord URL' },
+
+        // Branding
+        { setting_key: 'logo_header', setting_value: headerLogoUrl, description: 'Header Logo URL' },
+        { setting_key: 'logo_footer', setting_value: footerLogoUrl, description: 'Footer Logo URL' },
       ];
 
       const { error } = await supabase.from('app_settings').upsert(updates, { onConflict: 'setting_key' });
@@ -121,6 +157,91 @@ export default function AppSettingsPage() {
               onCheckedChange={setMaintenanceMode}
             />
             <Label htmlFor="maintenance-mode">Maintenance Mode</Label>
+          </div>
+          <Button onClick={handleSaveChanges}>Save Changes</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Branding</CardTitle>
+          <CardDescription>Update your website's logos.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="headerLogo">Header Logo URL</Label>
+            <Input
+              id="headerLogo"
+              value={headerLogoUrl}
+              onChange={(e) => setHeaderLogoUrl(e.target.value)}
+              placeholder="https://.../logo.png"
+            />
+            <p className="text-[0.8rem] text-muted-foreground">Recommended height: 40px - 60px</p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="footerLogo">Footer Logo URL</Label>
+            <Input
+              id="footerLogo"
+              value={footerLogoUrl}
+              onChange={(e) => setFooterLogoUrl(e.target.value)}
+              placeholder="https://.../footer-logo.png"
+            />
+            <p className="text-[0.8rem] text-muted-foreground">Recommended height: 40px - 60px</p>
+          </div>
+          <Button onClick={handleSaveChanges}>Save Changes</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Social Media Links</CardTitle>
+          <CardDescription>Manage your social media presence links here.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="instagram">Instagram URL</Label>
+            <Input
+              id="instagram"
+              value={instagramUrl}
+              onChange={(e) => setInstagramUrl(e.target.value)}
+              placeholder="https://instagram.com/..."
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="facebook">Facebook URL</Label>
+            <Input
+              id="facebook"
+              value={facebookUrl}
+              onChange={(e) => setFacebookUrl(e.target.value)}
+              placeholder="https://facebook.com/..."
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="twitter">Twitter / X URL</Label>
+            <Input
+              id="twitter"
+              value={twitterUrl}
+              onChange={(e) => setTwitterUrl(e.target.value)}
+              placeholder="https://twitter.com/..."
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="youtube">YouTube URL</Label>
+            <Input
+              id="youtube"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://youtube.com/..."
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="discord">Discord URL</Label>
+            <Input
+              id="discord"
+              value={discordUrl}
+              onChange={(e) => setDiscordUrl(e.target.value)}
+              placeholder="https://discord.gg/..."
+            />
           </div>
           <Button onClick={handleSaveChanges}>Save Changes</Button>
         </CardContent>

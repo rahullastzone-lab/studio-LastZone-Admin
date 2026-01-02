@@ -7,25 +7,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown } from 'lucide-react';
 
+import { format } from 'date-fns';
+
 export const columns: ColumnDef<NotificationSubscription>[] = [
   {
-    accessorKey: 'name',
-    header: 'Name',
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
+    accessorKey: 'interest', // Category
+    header: 'Game Interest',
+    cell: ({ row }) => {
+      return <Badge variant="outline">{row.getValue('interest')}</Badge>;
+    },
   },
   {
     accessorKey: 'whatsappNumber',
     header: 'WhatsApp Number',
-  },
-  {
-    accessorKey: 'interest',
-    header: 'Interested In',
-     cell: ({ row }) => {
-      return <Badge variant="secondary">{row.getValue('interest')}</Badge>;
-    },
   },
   {
     accessorKey: 'createdAt',
@@ -35,13 +29,35 @@ export const columns: ColumnDef<NotificationSubscription>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Date
+          Time
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
-      return <ClientDate date={row.getValue('createdAt')} formatString="PP" />;
+      const date = new Date(row.getValue('createdAt'));
+      return (
+        <div className="flex flex-col">
+          <span className="font-medium">{format(date, 'dd/MM/yyyy')}</span>
+          <span className="text-xs text-muted-foreground">{format(date, 'HH:mm')}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: 'email',
+    header: 'Email',
+  },
+  {
+    accessorKey: 'name',
+    header: 'Name',
+  },
+  {
+    accessorKey: 'serviceName', // Specific Service
+    header: 'Service Type/Name',
+    cell: ({ row }) => {
+      const val = row.getValue('serviceName') || row.getValue('interest') || 'Unknown';
+      return <Badge variant="secondary">{String(val)}</Badge>;
     },
   },
 ];
