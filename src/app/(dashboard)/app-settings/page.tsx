@@ -26,6 +26,10 @@ export default function AppSettingsPage() {
   const [supportEmail, setSupportEmail] = useState('');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
+  // Payment State
+  const [razorpayKeyId, setRazorpayKeyId] = useState('');
+  const [razorpayKeySecret, setRazorpayKeySecret] = useState('');
+
   // Social Media State
   const [instagramUrl, setInstagramUrl] = useState('');
   const [facebookUrl, setFacebookUrl] = useState('');
@@ -53,6 +57,10 @@ export default function AppSettingsPage() {
           if (setting.setting_key === 'app_name') setAppName(setting.setting_value);
           if (setting.setting_key === 'support_email') setSupportEmail(setting.setting_value);
           if (setting.setting_key === 'maintenance_mode') setMaintenanceMode(setting.setting_value === 'true');
+
+          // Payment Settings
+          if (setting.setting_key === 'razorpay_key_id') setRazorpayKeyId(setting.setting_value);
+          if (setting.setting_key === 'razorpay_key_secret') setRazorpayKeySecret(setting.setting_value);
 
           // Social Media
           if (setting.setting_key === 'social_instagram') setInstagramUrl(setting.setting_value);
@@ -84,6 +92,10 @@ export default function AppSettingsPage() {
         { setting_key: 'app_name', setting_value: appName, description: 'Global Application Name' },
         { setting_key: 'support_email', setting_value: supportEmail, description: 'Contact Email for Support' },
         { setting_key: 'maintenance_mode', setting_value: String(maintenanceMode), description: 'Enable/Disable App Access' },
+
+        // Payment Settings
+        { setting_key: 'razorpay_key_id', setting_value: razorpayKeyId, description: 'Razorpay API Key ID (Public)' },
+        { setting_key: 'razorpay_key_secret', setting_value: razorpayKeySecret, description: 'Razorpay API Key Secret (Private)' },
 
         // Social Media
         { setting_key: 'social_instagram', setting_value: instagramUrl, description: 'Instagram URL' },
@@ -157,6 +169,36 @@ export default function AppSettingsPage() {
               onCheckedChange={setMaintenanceMode}
             />
             <Label htmlFor="maintenance-mode">Maintenance Mode</Label>
+          </div>
+          <Button onClick={handleSaveChanges}>Save Changes</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Settings (Razorpay)</CardTitle>
+          <CardDescription>Configure your Razorpay API keys for Payin/Payout.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="razorpayKeyId">Razorpay Key ID</Label>
+            <Input
+              id="razorpayKeyId"
+              value={razorpayKeyId}
+              onChange={(e) => setRazorpayKeyId(e.target.value)}
+              placeholder="rzp_test_..."
+              type="password"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="razorpayKeySecret">Razorpay Key Secret</Label>
+            <Input
+              id="razorpayKeySecret"
+              value={razorpayKeySecret}
+              onChange={(e) => setRazorpayKeySecret(e.target.value)}
+              placeholder="Enter your secret"
+              type="password"
+            />
           </div>
           <Button onClick={handleSaveChanges}>Save Changes</Button>
         </CardContent>
