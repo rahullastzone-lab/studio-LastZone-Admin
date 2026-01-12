@@ -100,7 +100,7 @@ export default function PoliciesPage() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to save policy.',
+        description: error.message || 'Failed to save policy.',
       });
     }
   };
