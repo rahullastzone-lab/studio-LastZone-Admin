@@ -99,8 +99,9 @@ export default function PoliciesPage() {
       console.error('Error saving policy:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to save policy.',
+        title: 'Error (Debug)',
+        description: JSON.stringify(error) || error.message || 'Failed to save policy.',
+        duration: 10000,
       });
     }
   };
