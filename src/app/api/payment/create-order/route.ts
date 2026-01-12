@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOrder } from '@/lib/payment/razorpay';
+import { createZapUPIOrder } from '@/lib/payment/zapupi';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
         }
 
-        const order = await createOrder(amount); // amount in INR
+        const order = await createZapUPIOrder(amount); // amount in INR
 
         return NextResponse.json(order);
     } catch (error: any) {

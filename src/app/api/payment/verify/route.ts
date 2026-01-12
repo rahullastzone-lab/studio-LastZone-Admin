@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifySignature } from '@/lib/payment/razorpay';
+import { verifyZapUPISignature } from '@/lib/payment/zapupi';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         const { orderId, paymentId, signature, amount } = await req.json();
 
         // 1. Verify Signature
-        const isValid = await verifySignature(orderId, paymentId, signature);
+        const isValid = await verifyZapUPISignature(orderId, paymentId, signature);
         if (!isValid) {
             return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
         }
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
                 user_id: user.id,
                 amount: Number(amount),
                 type: 'deposit',
-                description: `Wallet Deposit (Razorpay: ${paymentId})`,
+                description: `Wallet Deposit (ZapUPI: ${paymentId})`,
                 status: 'completed', // Instant success
                 metadata: { order_id: orderId, payment_id: paymentId }
             });

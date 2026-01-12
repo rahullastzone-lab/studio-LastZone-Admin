@@ -27,8 +27,8 @@ export default function AppSettingsPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   // Payment State
-  const [razorpayKeyId, setRazorpayKeyId] = useState('');
-  const [razorpayKeySecret, setRazorpayKeySecret] = useState('');
+  const [zapupiToken, setZapupiToken] = useState('');
+  const [zapupiSecret, setZapupiSecret] = useState('');
 
   // Social Media State
   const [instagramUrl, setInstagramUrl] = useState('');
@@ -59,8 +59,8 @@ export default function AppSettingsPage() {
           if (setting.setting_key === 'maintenance_mode') setMaintenanceMode(setting.setting_value === 'true');
 
           // Payment Settings
-          if (setting.setting_key === 'razorpay_key_id') setRazorpayKeyId(setting.setting_value);
-          if (setting.setting_key === 'razorpay_key_secret') setRazorpayKeySecret(setting.setting_value);
+          if (setting.setting_key === 'zapupi_token') setZapupiToken(setting.setting_value);
+          if (setting.setting_key === 'zapupi_secret') setZapupiSecret(setting.setting_value);
 
           // Social Media
           if (setting.setting_key === 'social_instagram') setInstagramUrl(setting.setting_value);
@@ -94,8 +94,8 @@ export default function AppSettingsPage() {
         { setting_key: 'maintenance_mode', setting_value: String(maintenanceMode), description: 'Enable/Disable App Access' },
 
         // Payment Settings
-        { setting_key: 'razorpay_key_id', setting_value: razorpayKeyId, description: 'Razorpay API Key ID (Public)' },
-        { setting_key: 'razorpay_key_secret', setting_value: razorpayKeySecret, description: 'Razorpay API Key Secret (Private)' },
+        { setting_key: 'zapupi_token', setting_value: zapupiToken, description: 'ZapUPI Token Key' },
+        { setting_key: 'zapupi_secret', setting_value: zapupiSecret, description: 'ZapUPI Secret Key' },
 
         // Social Media
         { setting_key: 'social_instagram', setting_value: instagramUrl, description: 'Instagram URL' },
@@ -176,27 +176,27 @@ export default function AppSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Payment Settings (Razorpay)</CardTitle>
-          <CardDescription>Configure your Razorpay API keys for Payin/Payout.</CardDescription>
+          <CardTitle>Payment Settings (ZapUPI)</CardTitle>
+          <CardDescription>Configure your ZapUPI API keys for Payin/Payout.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="razorpayKeyId">Razorpay Key ID</Label>
+            <Label htmlFor="zapupiToken">ZapUPI Token Key</Label>
             <Input
-              id="razorpayKeyId"
-              value={razorpayKeyId}
-              onChange={(e) => setRazorpayKeyId(e.target.value)}
-              placeholder="rzp_test_..."
+              id="zapupiToken"
+              value={zapupiToken}
+              onChange={(e) => setZapupiToken(e.target.value)}
+              placeholder="Enter ZapUPI Token"
               type="password"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="razorpayKeySecret">Razorpay Key Secret</Label>
+            <Label htmlFor="zapupiSecret">ZapUPI Secret Key</Label>
             <Input
-              id="razorpayKeySecret"
-              value={razorpayKeySecret}
-              onChange={(e) => setRazorpayKeySecret(e.target.value)}
-              placeholder="Enter your secret"
+              id="zapupiSecret"
+              value={zapupiSecret}
+              onChange={(e) => setZapupiSecret(e.target.value)}
+              placeholder="Enter ZapUPI Secret"
               type="password"
             />
           </div>
