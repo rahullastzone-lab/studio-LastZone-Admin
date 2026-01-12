@@ -42,22 +42,34 @@ import { format, parseISO } from 'date-fns';
 import ClientDate from '@/components/ui/client-date';
 import { ArrowUpDown } from 'lucide-react';
 
-const statusVariant: {
-  [key in Transaction['status']]: 'default' | 'secondary' | 'destructive';
-} = {
+const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
   Success: 'default',
+  success: 'default',
+  Completed: 'default',
+  completed: 'default',
   Pending: 'secondary',
+  pending: 'secondary',
   Failed: 'destructive',
+  failed: 'destructive',
+  Rejected: 'destructive',
+  rejected: 'destructive',
 };
 
-const typeVariant: {
-  [key in Transaction['type']]: 'default' | 'secondary' | 'outline';
-} = {
+const typeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   Deposit: 'default',
+  deposit: 'default',
   Winnings: 'default',
+  winnings: 'default',
   Withdrawal: 'secondary',
+  withdrawal: 'secondary',
   'Entry Fee': 'secondary',
+  'entry_fee': 'secondary',
+  match_entry: 'secondary',
   Refund: 'outline',
+  refund: 'outline',
+  signup_bonus: 'default',
+  referral_bonus: 'default',
+  match_win: 'default',
 };
 
 export const columns: ColumnDef<Transaction>[] = [
@@ -90,8 +102,8 @@ export const columns: ColumnDef<Transaction>[] = [
             amount > 0
               ? 'text-green-500'
               : amount < 0
-              ? 'text-red-500'
-              : ''
+                ? 'text-red-500'
+                : ''
           }
         >
           {formatted}
@@ -143,7 +155,7 @@ export default function TransactionLogs({ data }: { data: Transaction[] }) {
       sorting,
       columnFilters,
     },
-     initialState: {
+    initialState: {
       pagination: {
         pageSize: 100,
       },
@@ -218,9 +230,9 @@ export default function TransactionLogs({ data }: { data: Transaction[] }) {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                       </TableHead>
                     );
                   })}
