@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Switch } from '@/components/ui/switch';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -61,10 +62,22 @@ const formSchema = z
     is_coming_soon: z.boolean().default(false),
   });
 
+// ... existing imports ...
+
+// Helper function to generate time options
+const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')); // 00, 05, 10 ... 55
+
 export default function CreateTournamentPage() {
   const { toast } = useToast();
   const router = useRouter();
   const supabase = createClient();
+
+  // Local state for 12h time picker
+  const [selectedHour, setSelectedHour] = useState<string>('12');
+  const [selectedMinute, setSelectedMinute] = useState<string>('00');
+  const [selectedAmPm, setSelectedAmPm] = useState<string>('PM');
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,7 +86,7 @@ export default function CreateTournamentPage() {
       prize_pool: 0,
       per_kill: 0,
       start_date: '',
-      start_time: '',
+      start_time: '12:00', // Default to 12:00 (24h) which matches 12:00 PM
       roomId: '',
       roomPassword: '',
       category: 'Normal',
@@ -81,9 +94,21 @@ export default function CreateTournamentPage() {
     },
   });
 
+  // Sync 12h selections to form's 24h start_time
+  useEffect(() => {
+    let hourInt = parseInt(selectedHour);
+    if (selectedAmPm === 'PM' && hourInt !== 12) hourInt += 12;
+    if (selectedAmPm === 'AM' && hourInt === 12) hourInt = 0;
+
+    const hourStr = hourInt.toString().padStart(2, '0');
+    const timeStr = `${hourStr}:${selectedMinute}`;
+    form.setValue('start_time', timeStr);
+  }, [selectedHour, selectedMinute, selectedAmPm, form]);
+
   const gameType = form.watch('game_type');
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // ... existing submit logic
     try {
       // 1. Construct Timestamp
       const [day, month, year] = values.start_date.split('-').map(Number);
@@ -91,12 +116,13 @@ export default function CreateTournamentPage() {
       const startDateObj = new Date(year, month - 1, day, hours, minutes);
       const startTimeISO = startDateObj.toISOString();
 
+      // ... rest of the submit function
       // 2. Insert Tournament
       const { data: tournament, error: tError } = await supabase
         .from('tournaments')
         .insert({
           name: values.name,
-          game_type: values.game_type, // Assuming schema has this column, or use game_id if you implemented relations strict
+          game_type: values.game_type,
           map: values.map,
           mode: values.mode,
           entry_fee: values.entry_fee,
@@ -113,29 +139,20 @@ export default function CreateTournamentPage() {
       if (tError) throw tError;
 
       if (tournament) {
-        // 3. Insert Initial Match (if room details provided or just to initialize)
-        // Even if empty, usually a tournament has at least one match scheduled
+        // 3. Insert Initial Match
         const { error: mError } = await supabase
           .from('matches')
           .insert({
             tournament_id: tournament.id,
             room_id: values.roomId || '',
             room_password: values.roomPassword || '',
-            start_time: startTimeISO,
+            start_time: startTimeISO, // Use the ISO string derived from the form values
             status: 'Scheduled'
           });
 
         if (mError) {
           console.error("Error creating match, details:", JSON.stringify(mError, null, 2));
-          console.log("Tournament ID:", tournament.id);
-          console.log("Payload:", {
-            tournament_id: tournament.id,
-            room_id: values.roomId || '',
-            room_password: values.roomPassword || '',
-            start_time: startTimeISO,
-            status: 'Scheduled'
-          });
-          // We don't stop flow here, key is tournament creation
+          // ... existing error logging
         }
       }
 
@@ -148,6 +165,7 @@ export default function CreateTournamentPage() {
       router.refresh();
 
     } catch (error: any) {
+      // ... existing error handling
       if (error?.code === 'PGRST205') {
         toast({
           title: 'Database Sync Error',
@@ -178,6 +196,7 @@ export default function CreateTournamentPage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {/* ... existing fields: Name, Category, Coming Soon ... */}
                 <FormField
                   control={form.control}
                   name="name"
@@ -240,6 +259,9 @@ export default function CreateTournamentPage() {
                     </FormItem>
                   )}
                 />
+
+                {/* ... existing fields: Game, Map, Mode, Logic same ... */}
+
                 <FormField
                   control={form.control}
                   name="game_type"
@@ -265,6 +287,7 @@ export default function CreateTournamentPage() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="map"
@@ -320,6 +343,7 @@ export default function CreateTournamentPage() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="mode"
@@ -345,6 +369,7 @@ export default function CreateTournamentPage() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="entry_fee"
@@ -392,6 +417,7 @@ export default function CreateTournamentPage() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="start_date"
@@ -405,20 +431,57 @@ export default function CreateTournamentPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="start_time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Time (24h)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="HH:MM" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
+                {/* NEW AM/PM Time Picker */}
+                <div className="flex flex-col space-y-2">
+                  <FormLabel>Start Time</FormLabel>
+                  <div className="flex gap-2">
+                    {/* Hour Selector */}
+                    <div className="flex-1">
+                      <Select value={selectedHour} onValueChange={setSelectedHour}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hours.map((h) => (
+                            <SelectItem key={h} value={h}>{h}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {/* Minute Selector */}
+                    <div className="flex-1">
+                      <Select value={selectedMinute} onValueChange={setSelectedMinute}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {minutes.map((m) => (
+                            <SelectItem key={m} value={m}>{m}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {/* AM/PM Selector */}
+                    <div className="flex-1">
+                      <Select value={selectedAmPm} onValueChange={setSelectedAmPm}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="AM/PM" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AM">AM</SelectItem>
+                          <SelectItem value="PM">PM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {/* Hidden input to register value with react-hook-form */}
+                  <input type="hidden" {...form.register('start_time')} />
+                  <FormMessage>{form.formState.errors.start_time?.message}</FormMessage>
+                </div>
+
                 <div />
+
                 <FormField
                   control={form.control}
                   name="roomId"
