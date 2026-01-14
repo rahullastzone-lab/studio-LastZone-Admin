@@ -306,7 +306,7 @@ create policy "Anon Insert" on public.tournaments for insert with check (true);
 create policy "Anon Insert" on public.matches for insert with check (true);
 
 -- Additional Policies for Game Management
--- Ensure full access for development
+-- Ensure full access for development (Fixes 'Coming Soon' toggle and Add Game issues)
 DROP POLICY IF EXISTS "Anon Insert" ON public.games;
 DROP POLICY IF EXISTS "Anon Update" ON public.games;
 DROP POLICY IF EXISTS "Anon Delete" ON public.games;
@@ -314,15 +314,12 @@ DROP POLICY IF EXISTS "Enable Read Access" ON public.games;
 DROP POLICY IF EXISTS "Enable Insert Access" ON public.games;
 DROP POLICY IF EXISTS "Enable Update Access" ON public.games;
 DROP POLICY IF EXISTS "Enable Delete Access" ON public.games;
+DROP POLICY IF EXISTS "Enable update for all users" ON public.games;
 
 CREATE POLICY "Enable Read Access" ON public.games FOR SELECT USING (true);
 CREATE POLICY "Enable Insert Access" ON public.games FOR INSERT WITH CHECK (true);
 CREATE POLICY "Enable Update Access" ON public.games FOR UPDATE USING (true);
 CREATE POLICY "Enable Delete Access" ON public.games FOR DELETE USING (true);
-
--- Ensure explicit update policy for toggle functionality
-DROP POLICY IF EXISTS "Enable update for all users" ON public.games;
-CREATE POLICY "Enable update for all users" ON public.games FOR UPDATE USING (true) WITH CHECK (true);
 
 create policy "Anon Insert" on public.banners for insert with check (true);
 create policy "Anon Insert" on public.faqs for insert with check (true);
@@ -346,21 +343,19 @@ values ('images', 'images', true)
 on conflict (id) do nothing;
 
 -- Storage Policies
-create policy "Public Access"
-  on storage.objects for select
-  using ( bucket_id = 'images' );
+-- Drop existing to ensure no conflicts
+drop policy if exists "Public Access" on storage.objects;
+drop policy if exists "Auth Upload" on storage.objects;
+drop policy if exists "Update Image" on storage.objects;
+drop policy if exists "Delete Image" on storage.objects;
+drop policy if exists "Allow Upload" on storage.objects;
+drop policy if exists "Allow Update" on storage.objects;
+drop policy if exists "Allow Delete" on storage.objects;
 
-create policy "Auth Upload"
-  on storage.objects for insert
-  with check ( bucket_id = 'images' );
-
-create policy "Update Image"
-  on storage.objects for update
-  with check ( bucket_id = 'images' );
-
-create policy "Delete Image"
-  on storage.objects for delete
-  using ( bucket_id = 'images' );
+create policy "Public Access" on storage.objects for select using ( bucket_id = 'images' );
+create policy "Allow Upload" on storage.objects for insert with check ( bucket_id = 'images' );
+create policy "Allow Update" on storage.objects for update with check ( bucket_id = 'images' );
+create policy "Allow Delete" on storage.objects for delete using ( bucket_id = 'images' );
 
 -- AUTOMATION: Handle New User Signup (Trigger)
 -- This ensures that whenever a user signs up via Auth, they are added to public.profiles
