@@ -22,6 +22,7 @@ export type Tournament = {
   per_kill: number;
   start_time: string;
   status: 'Open' | 'Closed' | 'Completed';
+  joined_count?: number;
 };
 
 export type Transaction = {

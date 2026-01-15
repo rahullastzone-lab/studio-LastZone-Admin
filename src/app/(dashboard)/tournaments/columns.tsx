@@ -67,6 +67,13 @@ export const columns: ColumnDef<Tournament>[] = [
     },
   },
   {
+    accessorKey: 'joined_count',
+    header: 'Joined',
+    cell: ({ row }) => {
+      return <div>{row.original.joined_count || 0}</div>;
+    },
+  },
+  {
     accessorKey: 'start_time',
     header: 'Start Time',
     cell: ({ row }) => {

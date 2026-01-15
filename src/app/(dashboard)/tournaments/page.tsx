@@ -27,7 +27,8 @@ export default function TournamentsPage() {
                     *,
                     games (
                         name
-                    )
+                    ),
+                    registrations (count)
                 `);
 
         if (error) {
@@ -50,6 +51,7 @@ export default function TournamentsPage() {
             per_kill: t.per_kill,
             start_time: t.start_time,
             status: t.status,
+            joined_count: t.registrations?.[0]?.count || 0,
           })) || [];
           setData(mappedData);
         }
