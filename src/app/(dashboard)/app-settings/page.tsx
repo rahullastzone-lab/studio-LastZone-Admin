@@ -59,8 +59,8 @@ export default function AppSettingsPage() {
           if (setting.setting_key === 'maintenance_mode') setMaintenanceMode(setting.setting_value === 'true');
 
           // Payment Settings
-          if (setting.setting_key === 'zapupi_token') setZapupiToken(setting.setting_value);
-          if (setting.setting_key === 'zapupi_secret') setZapupiSecret(setting.setting_value);
+          if (setting.setting_key === 'ZAPUPI_TOKEN_KEY') setZapupiToken(setting.setting_value);
+          if (setting.setting_key === 'ZAPUPI_SECRET_KEY') setZapupiSecret(setting.setting_value);
 
           // Social Media
           if (setting.setting_key === 'social_instagram') setInstagramUrl(setting.setting_value);
@@ -94,8 +94,8 @@ export default function AppSettingsPage() {
         { setting_key: 'maintenance_mode', setting_value: String(maintenanceMode), description: 'Enable/Disable App Access' },
 
         // Payment Settings
-        { setting_key: 'zapupi_token', setting_value: zapupiToken, description: 'ZapUPI Token Key' },
-        { setting_key: 'zapupi_secret', setting_value: zapupiSecret, description: 'ZapUPI Secret Key' },
+        { setting_key: 'ZAPUPI_TOKEN_KEY', setting_value: zapupiToken, description: 'ZapUPI Token Key' },
+        { setting_key: 'ZAPUPI_SECRET_KEY', setting_value: zapupiSecret, description: 'ZapUPI Secret Key' },
 
         // Social Media
         { setting_key: 'social_instagram', setting_value: instagramUrl, description: 'Instagram URL' },
