@@ -8,6 +8,7 @@ import {
   Edit,
   Trash2,
   Image as ImageIcon,
+  RefreshCcw,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
@@ -196,6 +197,9 @@ export default function BannersPage() {
         title="Banner Management"
         description="Update the promotional banners on the main website."
       >
+        <Button variant="outline" size="icon" onClick={fetchBanners}>
+          <RefreshCcw className="h-4 w-4" />
+        </Button>
         <Button onClick={() => handleOpenDialog()}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add New Banner
