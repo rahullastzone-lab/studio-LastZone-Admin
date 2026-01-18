@@ -35,6 +35,7 @@ export type Registration = {
     avatar_url: string | null
   }
   player_details: PlayerDetails
+  source?: string
 }
 
 export const columns: ColumnDef<Registration>[] = [
@@ -54,6 +55,15 @@ export const columns: ColumnDef<Registration>[] = [
     cell: ({ row }) => {
       return new Date(row.original.created_at).toLocaleDateString()
     },
+  },
+  {
+    accessorKey: "source",
+    header: "Type",
+    cell: ({ row }) => {
+      return (
+        <Badge variant="outline">{row.original.source || 'Tournament'}</Badge>
+      )
+    }
   },
   {
     accessorKey: "tournament",
