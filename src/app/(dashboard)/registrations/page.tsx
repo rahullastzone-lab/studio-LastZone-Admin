@@ -22,8 +22,8 @@ export default function RegistrationsPage() {
           .from('registrations')
           .select(`
             id, created_at, status, player_details,
-            tournaments:tournament_id ( name, game_type ),
-            profiles:user_id ( username, avatar_url )
+            tournaments ( name, game_type ),
+            profiles ( username, avatar_url )
           `)
           .order('created_at', { ascending: false });
 
@@ -34,8 +34,8 @@ export default function RegistrationsPage() {
           .from('match_registrations')
           .select(`
             id, created_at, status, 
-            matches:match_id ( id, room_id, tournaments:tournament_id ( name, game_type ) ),
-            profiles:user_id ( username, avatar_url )
+            matches ( id, room_id, tournaments ( name, game_type ) ),
+            profiles ( username, avatar_url )
           `)
           .order('created_at', { ascending: false });
 
