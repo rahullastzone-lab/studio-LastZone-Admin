@@ -147,7 +147,7 @@ export default function CreateTournamentPage() {
             room_id: values.roomId || '',
             room_password: values.roomPassword || '',
             start_time: startTimeISO, // Use the ISO string derived from the form values
-            status: 'Scheduled'
+            status: 'Open'
           });
 
         if (mError) {
