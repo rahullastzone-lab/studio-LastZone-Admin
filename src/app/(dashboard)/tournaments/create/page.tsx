@@ -116,13 +116,21 @@ export default function CreateTournamentPage() {
       const startDateObj = new Date(year, month - 1, day, hours, minutes);
       const startTimeISO = startDateObj.toISOString();
 
-      // ... rest of the submit function
+      // 1.5 Fetch Game ID
+      // We explicitly look up the game ID from the 'games' table to ensure relationships work
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('name', values.game_type)
+        .single();
+
       // 2. Insert Tournament
       const { data: tournament, error: tError } = await supabase
         .from('tournaments')
         .insert({
           name: values.name,
           game_type: values.game_type,
+          game_id: gameData?.id, // Link to games table
           map: values.map,
           mode: values.mode,
           entry_fee: values.entry_fee,
