@@ -53,6 +53,8 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
   failed: 'destructive',
   Rejected: 'destructive',
   rejected: 'destructive',
+  Refund: 'destructive',
+  refund: 'destructive',
 };
 
 const typeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
@@ -215,6 +217,7 @@ export default function TransactionLogs({ data }: { data: Transaction[] }) {
                 <SelectItem value="Success">Success</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="Failed">Failed</SelectItem>
+                <SelectItem value="Refund">Refund</SelectItem>
               </SelectContent>
             </Select>
           </div>

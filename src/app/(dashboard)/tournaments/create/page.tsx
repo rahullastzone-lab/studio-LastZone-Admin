@@ -68,6 +68,17 @@ const formSchema = z
 const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
 const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')); // 00, 05, 10 ... 55
 
+// Helper arrays for Date Picker
+const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+const months = [
+  { value: '01', label: 'January' }, { value: '02', label: 'February' }, { value: '03', label: 'March' },
+  { value: '04', label: 'April' }, { value: '05', label: 'May' }, { value: '06', label: 'June' },
+  { value: '07', label: 'July' }, { value: '08', label: 'August' }, { value: '09', label: 'September' },
+  { value: '10', label: 'October' }, { value: '11', label: 'November' }, { value: '12', label: 'December' }
+];
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 5 }, (_, i) => (currentYear + i).toString());
+
 export default function CreateTournamentPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -77,6 +88,11 @@ export default function CreateTournamentPage() {
   const [selectedHour, setSelectedHour] = useState<string>('12');
   const [selectedMinute, setSelectedMinute] = useState<string>('00');
   const [selectedAmPm, setSelectedAmPm] = useState<string>('PM');
+
+  // Local state for Date Picker
+  const [selectedDay, setSelectedDay] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<string>(currentYear.toString());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,6 +109,14 @@ export default function CreateTournamentPage() {
       is_coming_soon: false,
     },
   });
+
+  // Sync Date selections to form's start_date
+  useEffect(() => {
+    if (selectedDay && selectedMonth && selectedYear) {
+      const dateStr = `${selectedDay}-${selectedMonth}-${selectedYear}`;
+      form.setValue('start_date', dateStr);
+    }
+  }, [selectedDay, selectedMonth, selectedYear, form]);
 
   // Sync 12h selections to form's 24h start_time
   useEffect(() => {
@@ -426,19 +450,56 @@ export default function CreateTournamentPage() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="start_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Date</FormLabel>
-                      <FormControl>
-                        <Input placeholder="DD-MM-YYYY" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* NEW Start Date Picker (Day / Month / Year) */}
+                <div className="flex flex-col space-y-2">
+                  <FormLabel>Start Date</FormLabel>
+                  <div className="flex gap-2">
+                    {/* Day Selector */}
+                    <div className="flex-1">
+                      <Select value={selectedDay} onValueChange={setSelectedDay}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Day" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {days.map((d) => (
+                            <SelectItem key={d} value={d}>{d}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Month Selector */}
+                    <div className="flex-1">
+                      <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {months.map((m) => (
+                            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Year Selector */}
+                    <div className="flex-1">
+                      <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {years.map((y) => (
+                            <SelectItem key={y} value={y}>{y}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {/* Hidden input to register value with react-hook-form */}
+                  <input type="hidden" {...form.register('start_date')} />
+                  <FormMessage>{form.formState.errors.start_date?.message}</FormMessage>
+                </div>
 
                 {/* NEW AM/PM Time Picker */}
                 <div className="flex flex-col space-y-2">

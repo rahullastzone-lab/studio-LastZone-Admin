@@ -73,6 +73,12 @@ export function TournamentActions({ tournament }: TournamentActionsProps) {
                         Manage Results
                     </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href={`/registrations?tournament_id=${tournament.id}`}>
+                        <ClipboardList className="mr-2 h-4 w-4" />
+                        View Participants
+                    </Link>
+                </DropdownMenuItem>
                 {tournament.status === 'Open' && (
                     <DropdownMenuItem onClick={handleClose} className="text-destructive focus:text-destructive">
                         <Ban className="mr-2 h-4 w-4" />

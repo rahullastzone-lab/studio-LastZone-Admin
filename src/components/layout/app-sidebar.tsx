@@ -37,6 +37,7 @@ const AppSidebar = () => {
     { href: '/app-settings', label: 'App Settings', icon: Settings },
     { href: '/faqs', label: 'FAQs', icon: HelpCircle },
     { href: '/games', label: 'Games', icon: Gamepad2 },
+    { href: '/games/maps', label: 'Game Maps', icon: ImageIcon },
     { href: '/market-items', label: 'Market Items', icon: Store },
     { href: '/policies', label: 'Policies', icon: FileText },
     { href: '/registrations', label: 'Registered Players', icon: Users },

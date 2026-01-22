@@ -52,6 +52,8 @@ export default function TournamentsPage() {
             start_time: t.start_time,
             status: t.status,
             joined_count: t.registrations?.[0]?.count || 0,
+            category: t.category,
+            is_coming_soon: t.is_coming_soon,
           })) || [];
           setData(mappedData);
         }

@@ -23,6 +23,8 @@ export type Tournament = {
   start_time: string;
   status: 'Open' | 'Closed' | 'Completed';
   joined_count?: number;
+  category?: 'Normal' | 'Mega';
+  is_coming_soon?: boolean;
 };
 
 export type Transaction = {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { columns, Registration } from './columns';
 import { DataTable } from './data-table';
@@ -12,61 +13,39 @@ export default function RegistrationsPage() {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const tournamentId = searchParams.get('tournament_id');
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
         // Fetch from 'registrations' (Tournament level)
-        const { data: tournamentRegs, error: tError } = await supabase
+        let query = supabase
           .from('registrations')
           .select(`
             id, created_at, status, player_details,
             tournaments ( name, game_type ),
-            profiles ( username, avatar_url )
+            profiles ( username, avatar_url, in_game_name, bgmi_id, email, phone )
           `)
           .order('created_at', { ascending: false });
+
+        if (tournamentId) {
+          query = query.eq('tournament_id', tournamentId);
+        }
+
+        const { data: tournamentRegs, error: tError } = await query;
 
         if (tError) throw tError;
 
-        // Fetch from 'match_registrations' (Match level)
-        const { data: matchRegs, error: mError } = await supabase
-          .from('match_registrations')
-          .select(`
-            id, created_at, status, 
-            matches ( id, room_id, tournaments ( name, game_type ) ),
-            profiles ( username, avatar_url )
-          `)
-          .order('created_at', { ascending: false });
+        console.log('Fetched Registrations:', tournamentRegs);
 
-        if (mError) throw mError;
-
-        // Combine and map data
-        const tData = (tournamentRegs as any[])?.map(r => ({
+        const formattedData = (tournamentRegs as any[])?.map(r => ({
           ...r,
           source: 'Tournament'
         })) || [];
 
-        const mData = (matchRegs as any[])?.map(r => ({
-          id: r.id,
-          created_at: r.created_at,
-          status: r.status,
-          // Map match info to similar structure
-          tournaments: {
-            name: r.matches?.tournaments?.name || "Match",
-            game_type: r.matches?.tournaments?.game_type || "Unknown"
-          },
-          profiles: r.profiles,
-          player_details: {}, // match_registrations might not have player_details yet, or we need to check schema
-          source: 'Match'
-        })) || [];
-
-        // Sort combined data by date desc
-        const combined = [...tData, ...mData].sort((a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-
-        setData(combined);
+        setData(formattedData);
 
       } catch (error: any) {
         toast({
@@ -90,7 +69,7 @@ export default function RegistrationsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Registered Players"
-        description="View all player registrations for tournaments and matches."
+        description={tournamentId ? "Viewing registrations for specific tournament" : "View all player registrations for tournaments and matches."}
       />
 
       <div className="container mx-auto py-10">

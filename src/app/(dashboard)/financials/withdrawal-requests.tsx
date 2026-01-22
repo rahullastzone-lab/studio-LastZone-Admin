@@ -83,36 +83,52 @@ export default function WithdrawalRequests({ onRefresh }: { onRefresh: () => voi
     fetchWithdrawals();
   }, []); // Initial load
 
-  // Re-fetch when onRefresh is triggered from parent if needed, 
-  // but this component fetches its own data now for better control.
-  // We can expose a refresh method if needed.
-
   const handleAction = async (
     action: 'Approved' | 'Rejected',
     transaction: Transaction
   ) => {
     try {
       if (action === 'Approved') {
-        const { error } = await supabase
+        const { data: updatedTx, error } = await supabase
           .from('transactions')
-          .update({ status: 'completed' }) // Using lowercase as per requirement
-          .eq('id', transaction.id);
+          .update({ status: 'success' })
+          .eq('id', transaction.id)
+          .select();
+
+        console.log('Approved Update Result:', { updatedTx, error });
 
         if (error) throw error;
       } else {
         // Rejected logic: Refund to Winnings
         console.log('Rejecting and Refunding...', transaction);
 
-        // 1. Update Transaction Status to 'failed'
-        const { error: txError } = await supabase
+        // 1. Update Original Transaction Status to 'refund'
+        const { data: updatedTx, error: txError } = await supabase
           .from('transactions')
-          .update({ status: 'failed' })
-          .eq('id', transaction.id);
+          .update({ status: 'refund' })
+          .eq('id', transaction.id)
+          .select();
+
+        console.log('Rejected Update Result:', { updatedTx, txError });
 
         if (txError) throw txError;
 
-        // 2. Refund to User's Winnings Balance
-        // We need to fetch current winnings first
+        // 2. Create a NEW Transaction for the Refund (Credit)
+        const creditAmount = Math.abs(Number(transaction.amount));
+
+        const { error: refundTxError } = await supabase
+          .from('transactions')
+          .insert({
+            user_id: transaction.user_id,
+            amount: creditAmount,
+            type: 'Winnings', // Changed to Winnings to ensure positive display
+            status: 'success',
+            description: `Refund for withdrawal`
+          });
+
+        if (refundTxError) throw refundTxError;
+
+        // 3. Refund to User's Winnings Balance
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('winnings')
@@ -122,24 +138,17 @@ export default function WithdrawalRequests({ onRefresh }: { onRefresh: () => voi
         if (profileError) throw profileError;
 
         const currentWinnings = Number(profile?.winnings) || 0;
-        const refundAmount = Number(transaction.amount);
-        const newWinnings = currentWinnings + refundAmount;
+        const newWinnings = currentWinnings + creditAmount;
 
-        const { error: updateError } = await supabase
+        const { data: updatedProfile, error: updateError } = await supabase
           .from('profiles')
           .update({ winnings: newWinnings })
-          .eq('id', transaction.user_id);
+          .eq('id', transaction.user_id)
+          .select();
+
+        console.log('Profile Refund Update Result:', { updatedProfile, updateError });
 
         if (updateError) throw updateError;
-
-        // 3. Log Refund Transaction (Optional but good for audit)
-        // Since the original was marked failed, we might want a new 'refund' entry
-        // OR just keeping the original as 'failed' implies money wasn't taken out effectively?
-        // Requirement says: "REFUND: Update profiles: winnings = winnings + Amount"
-        // It doesn't explicitly say create a NEW transaction log for the refund, 
-        // but usually good practice. However, simply marking the withdrawal as 'failed' 
-        // and fixing the balance is often enough logic for "reversing" the action.
-        // Let's stick to the requirement: Update status='failed', Update profiles.
       }
 
       toast({
@@ -203,8 +212,8 @@ export default function WithdrawalRequests({ onRefresh }: { onRefresh: () => voi
       cell: ({ row }) => {
         const status = row.original.status?.toLowerCase();
         let color = 'text-yellow-500';
-        if (status === 'completed') color = 'text-green-500';
-        if (status === 'failed') color = 'text-red-500';
+        if (status === 'completed' || status === 'success') color = 'text-green-500';
+        if (status === 'failed' || status === 'refund') color = 'text-red-500';
 
         return <div className={`capitalize font-medium ${color}`}>{status}</div>;
       },
