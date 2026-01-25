@@ -45,6 +45,7 @@ export default function FinancialsPage() {
         amount: t.amount,
         type: t.type,
         status: t.status,
+        description: t.description,
         created_at: t.created_at,
       }));
 
@@ -72,6 +73,7 @@ export default function FinancialsPage() {
         <PageHeader
           title="Financial & Wallet Center"
           description="Manage withdrawals and view all transactions."
+          onRefresh={fetchData}
         />
         <AddFundsModal onSuccess={fetchData} />
       </div>

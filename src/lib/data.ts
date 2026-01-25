@@ -34,6 +34,7 @@ export type Transaction = {
   amount: number;
   type: 'Deposit' | 'Withdrawal' | 'Refund' | 'Winnings' | 'Entry Fee';
   status: 'Success' | 'Pending' | 'Failed';
+  description?: string;
   created_at: string;
 };
 

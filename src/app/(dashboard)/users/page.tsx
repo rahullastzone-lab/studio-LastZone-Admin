@@ -198,6 +198,7 @@ export default function UsersPage() {
         <PageHeader
           title="User Management"
           description="View and manage all platform users."
+          onRefresh={fetchUsers}
         />
         <Button onClick={() => setIsAddUserOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" />

@@ -136,6 +136,41 @@ export const columns: ColumnDef<Transaction>[] = [
       return <Badge variant={statusVariant[status]}>{status}</Badge>;
     },
   },
+  {
+    accessorKey: 'description',
+    header: 'Description',
+    cell: ({ row }) => {
+      const description = (row.getValue('description') as string) || '';
+      // Regex to parse bank details
+      // fast check: startsWith "Withdrawal via Bank:"
+      if (description.startsWith('Withdrawal via Bank:')) {
+        const regex = /Withdrawal via Bank: (.+?) \| Acc: (.+?) \| IFSC: (.+)/;
+        const match = description.match(regex);
+        if (match) {
+          // match[1] = Name, match[2] = Acc, match[3] = IFSC
+          return (
+            <div className="flex flex-col gap-1 text-xs">
+              <div>
+                <span className="font-semibold text-muted-foreground mr-1">Name:</span>
+                {match[1]}
+              </div>
+              <div className="flex items-center gap-2">
+                <span>
+                  <span className="font-semibold text-muted-foreground mr-1">Acc:</span>
+                  <code className="bg-muted px-1 py-0.5 rounded select-all">{match[2]}</code>
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold text-muted-foreground mr-1">IFSC:</span>
+                <code className="bg-muted px-1 py-0.5 rounded select-all">{match[3]}</code>
+              </div>
+            </div>
+          )
+        }
+      }
+      return <span className="text-sm text-muted-foreground">{description}</span>;
+    },
+  },
 ];
 
 export default function TransactionLogs({ data }: { data: Transaction[] }) {

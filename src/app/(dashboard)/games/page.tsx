@@ -132,6 +132,7 @@ export default function GamesPage() {
       <PageHeader
         title="Game Management"
         description="Manage the games available for tournaments."
+        onRefresh={fetchGames}
       >
         <Button onClick={() => { setGameToEdit(null); setIsAddGameOpen(true); }}>
           <PlusCircle className="mr-2 h-4 w-4" />

@@ -196,10 +196,8 @@ export default function BannersPage() {
       <PageHeader
         title="Banner Management"
         description="Update the promotional banners on the main website."
+        onRefresh={fetchBanners}
       >
-        <Button variant="outline" size="icon" onClick={fetchBanners}>
-          <RefreshCcw className="h-4 w-4" />
-        </Button>
         <Button onClick={() => handleOpenDialog()}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add New Banner

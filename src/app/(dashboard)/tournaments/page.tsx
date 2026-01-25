@@ -16,53 +16,55 @@ export default function TournamentsPage() {
   const supabase = createClient();
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        // Fetch tournaments and related game name if available
-        // Note: Schema might use game_id referencing games(id) or just game_type string
-        const { data: tournaments, error } = await supabase
-          .from('tournaments')
-          .select(`
-                    *,
-                    games (
-                        name
-                    ),
-                    registrations (count)
-                `);
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch tournaments and related game name if available
+      // Note: Schema might use game_id referencing games(id) or just game_type string
+      const { data: tournaments, error } = await supabase
+        .from('tournaments')
+        .select(`
+                  *,
+                  games (
+                      name
+                  ),
+                  registrations (count)
+              `);
 
-        if (error) {
-          console.error("Error fetching tournaments:", error);
-          toast({
-            title: "Error fetching tournaments",
-            description: error.message,
-            variant: "destructive"
-          });
-        } else {
-          const mappedData: Tournament[] = tournaments?.map((t: any) => ({
-            id: t.id,
-            name: t.name,
-            // Use game name from relation if available, otherwise fallback to game_type column, otherwise 'Unknown'
-            game_type: t.games?.name || t.game_type || 'Unknown',
-            map: t.map,
-            mode: t.mode,
-            entry_fee: t.entry_fee,
-            prize_pool: t.prize_pool,
-            per_kill: t.per_kill,
-            start_time: t.start_time,
-            status: t.status,
-            joined_count: t.registrations?.[0]?.count || 0,
-            category: t.category,
-            is_coming_soon: t.is_coming_soon,
-          })) || [];
-          setData(mappedData);
-        }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-      } finally {
-        setIsLoading(false);
+      if (error) {
+        console.error("Error fetching tournaments:", error);
+        toast({
+          title: "Error fetching tournaments",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        const mappedData: Tournament[] = tournaments?.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          // Use game name from relation if available, otherwise fallback to game_type column, otherwise 'Unknown'
+          game_type: t.games?.name || t.game_type || 'Unknown',
+          map: t.map,
+          mode: t.mode,
+          entry_fee: t.entry_fee,
+          prize_pool: t.prize_pool,
+          per_kill: t.per_kill,
+          start_time: t.start_time,
+          status: t.status,
+          joined_count: t.registrations?.[0]?.count || 0,
+          category: t.category,
+          is_coming_soon: t.is_coming_soon,
+        })) || [];
+        setData(mappedData);
       }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -75,6 +77,7 @@ export default function TournamentsPage() {
       <PageHeader
         title="Tournaments"
         description="Manage all esports tournaments."
+        onRefresh={fetchData}
       >
         <div className="flex gap-2">
           <Button variant="secondary" disabled>

@@ -210,6 +210,7 @@ export default function MarketItemsPage() {
       <PageHeader
         title="Marketplace"
         description="Manage items available for purchase."
+        onRefresh={fetchMarketItems}
       >
         <Button onClick={() => handleOpenDialog()}>
           <PlusCircle className="mr-2 h-4 w-4" />
