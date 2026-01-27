@@ -61,6 +61,8 @@ export default function UsersPage() {
         walletBalance: u.wallet_balance || 0,
         isAdmin: u.is_admin,
         status: u.status,
+        instagram_link: u.instagram_link,
+        youtube_link: u.youtube_link,
       }));
       setUsers(mappedUsers);
     }

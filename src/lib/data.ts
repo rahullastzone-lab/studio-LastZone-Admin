@@ -7,6 +7,8 @@ export type User = {
   walletBalance: number;
   isAdmin: boolean;
   status?: 'Active' | 'Banned';
+  instagram_link?: string;
+  youtube_link?: string;
 };
 
 export type Tournament = {

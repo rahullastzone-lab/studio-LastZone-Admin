@@ -16,6 +16,8 @@ import {
   Ban,
   PlusCircle,
   CheckCircle,
+  Instagram,
+  Youtube,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { User as UserType } from '@/lib/data';
@@ -56,6 +58,28 @@ export const columns = ({ onBanToggle, onMoneyAction }: ColumnProps): ColumnDef<
           <div className="flex flex-col">
             <span className="font-medium">{user.username}</span>
             <span className="text-xs text-muted-foreground">{user.email}</span>
+            <div className="flex gap-1 mt-1">
+              {user.instagram_link && (
+                <a
+                  href={user.instagram_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-pink-600 hover:text-pink-700 hover:scale-110 transition-transform"
+                >
+                  <Instagram className="h-4 w-4" />
+                </a>
+              )}
+              {user.youtube_link && (
+                <a
+                  href={user.youtube_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-red-600 hover:text-red-700 hover:scale-110 transition-transform"
+                >
+                  <Youtube className="h-4 w-4" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       );
