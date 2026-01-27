@@ -44,6 +44,8 @@ export default function NotifySubscribersPage() {
           id,
           game_interest,
           whatsapp_number,
+          email,
+          guest_name,
           created_at,
           profiles (
             username,
@@ -57,8 +59,8 @@ export default function NotifySubscribersPage() {
             if (data) {
                 const mappedSubscribers: Subscriber[] = data.map((item: any) => ({
                     id: item.id,
-                    username: item.profiles?.username || 'Unknown',
-                    email: item.profiles?.email || 'No Email',
+                    username: item.profiles?.username || item.guest_name || 'Unknown',
+                    email: item.profiles?.email || item.email || 'No Email',
                     whatsapp_number: item.whatsapp_number || '-',
                     game_interest: item.game_interest || 'General',
                     created_at: item.created_at,
