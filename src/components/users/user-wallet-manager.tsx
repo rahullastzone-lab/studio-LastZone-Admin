@@ -105,6 +105,8 @@ const TeamViewModal = ({ user, isOpen, onClose }: { user: UserProfile | null, is
     );
 };
 
+const ITEMS_PER_PAGE = 500;
+
 export function UserWalletManager() {
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(false);
@@ -117,6 +119,10 @@ export function UserWalletManager() {
     const [reason, setReason] = useState('');
     const [submitLoading, setSubmitLoading] = useState(false);
 
+    // Pagination State
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+
     // Team View State
     const [teamViewUser, setTeamViewUser] = useState<UserProfile | null>(null);
     const [isTeamViewOpen, setIsTeamViewOpen] = useState(false);
@@ -124,14 +130,52 @@ export function UserWalletManager() {
     const { toast } = useToast();
     const supabase = createClient();
 
-    const fetchRecentUsers = useCallback(async () => {
+    const fetchUsers = useCallback(async (checkSearch = false) => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(10);
+            // If searching, we skip standard pagination logic or reset it?
+            // The user wants a specific search OR a list.
+            // If searchQuery is present, we search. If not, we list.
+
+            let data: any[] | null = null;
+            let error: any = null;
+
+            if (searchQuery.trim()) {
+                let query = supabase.from('profiles').select('*');
+                // Check if input looks like a UUID
+                const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(searchQuery);
+
+                if (isUuid) {
+                    query = query.eq('id', searchQuery);
+                } else {
+                    query = query.or(`username.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
+                }
+
+                // For search, we still limit but maybe reasonable high or use pagination too?
+                // For now, let's fetch enough to be useful.
+                const result = await query.limit(ITEMS_PER_PAGE);
+                data = result.data;
+                error = result.error;
+
+                // Disable 'Next' for search results unless we implement search pagination
+                setHasMore(false);
+            } else {
+                const from = page * ITEMS_PER_PAGE;
+                const to = from + ITEMS_PER_PAGE - 1;
+
+                const result = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .range(from, to);
+
+                data = result.data;
+                error = result.error;
+
+                if (data) {
+                    setHasMore(data.length === ITEMS_PER_PAGE);
+                }
+            }
 
             if (error) throw error;
 
@@ -158,61 +202,36 @@ export function UserWalletManager() {
         } finally {
             setLoading(false);
         }
-    }, [supabase, toast]);
+    }, [supabase, toast, page, searchQuery]);
 
-    // Fetch on mount
+    // Fetch when page changes, but only if no search active (or if search logic handled inside)
+    // We'll trigger this manually for search to avoid double fetch
     useEffect(() => {
-        fetchRecentUsers();
-    }, [fetchRecentUsers]);
+        fetchUsers();
+    }, [page, fetchUsers]);
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) {
-            fetchRecentUsers();
-            return;
-        }
-        setLoading(true);
-
-        try {
-            let query = supabase.from('profiles').select('*');
-
-            // Check if input looks like a UUID (8-4-4-4-12 hex digits)
-            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(searchQuery);
-
-            if (isUuid) {
-                query = query.eq('id', searchQuery);
-            } else {
-                // Search username or email (case-insensitive for better UX)
-                query = query.or(`username.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
-            }
-
-            const { data, error } = await query.limit(20); // allow multiple results
-
-            if (error) throw error;
-
-            if (data) {
-                setUsers(data.map(u => ({
-                    id: u.id,
-                    username: u.username || 'Unknown',
-                    email: u.email || 'No Email',
-                    wallet_balance: u.wallet_balance || 0,
-                    winnings: u.winnings || 0,
-                    bonus: u.bonus || 0,
-                    avatar_url: u.avatar_url,
-                    full_name: u.full_name,
-                    created_at: u.created_at,
-                    teammates: u.teammates
-                })));
-            }
-        } catch (error: any) {
-            toast({
-                title: "Search Error",
-                description: error.message,
-                variant: "destructive"
-            });
-        } finally {
-            setLoading(false);
-        }
+    const handleSearch = () => {
+        setPage(0); // Reset page
+        fetchUsers(); // Trigger fetch
     };
+
+    const handleClearSearch = () => {
+        setSearchQuery('');
+        setPage(0);
+        // Effect will trigger fetch because page set to 0 (or if already 0, we might need manual)
+        // If page was already 0, and we clear search, effect might not run if dependency is just page.
+        // Actually fetchUsers depends on searchQuery. 
+        // Better to just set Empty and let effect run or call manually?
+        // Let's call manually to be sure if immediate.
+        // But setState is async.
+        // Simplified: Button sets query to '', then we need to fetch.
+        // Effect on searchQuery? No, we don't want to fetch on every keystroke usually unless debounced.
+    };
+
+    // Trigger on Enter
+    const onSearchKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') handleSearch();
+    }
 
     const openManageDialog = (user: UserProfile, type: 'wallet_balance' | 'winnings' | 'bonus' | 'refund' = 'refund') => {
         setSelectedUser(user);
@@ -324,7 +343,7 @@ export function UserWalletManager() {
                     <CardDescription>View recent users or search to manage funds.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
@@ -332,12 +351,20 @@ export function UserWalletManager() {
                                 className="pl-9"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                onKeyDown={onSearchKeyDown}
                             />
                         </div>
-                        <Button onClick={handleSearch} disabled={loading}>
-                            {loading ? 'Searching...' : 'Search User'}
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button onClick={handleSearch} disabled={loading}>
+                                {loading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                {loading ? 'Searching...' : 'Search User'}
+                            </Button>
+                            {searchQuery && (
+                                <Button variant="outline" onClick={() => { setSearchQuery(''); setPage(0); }}>
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -382,6 +409,7 @@ export function UserWalletManager() {
                                             <div className="flex flex-col">
                                                 <span className="font-medium text-sm">{user.username}</span>
                                                 <span className="text-xs text-muted-foreground">{user.email}</span>
+                                                <span className="text-[10px] text-muted-foreground font-mono select-all">ID: {user.id}</span>
                                             </div>
                                         </div>
                                     </TableCell>
@@ -424,6 +452,33 @@ export function UserWalletManager() {
                             ))}
                         </TableBody>
                     </Table>
+
+                    {/* Pagination Controls */}
+                    {!searchQuery && users.length > 0 && (
+                        <div className="flex items-center justify-between p-4 border-t">
+                            <div className="text-sm text-muted-foreground">
+                                Page {page + 1} (Showing {users.length} users)
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                                    disabled={page === 0 || loading}
+                                >
+                                    Previous
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setPage(p => p + 1)}
+                                    disabled={!hasMore || loading}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
