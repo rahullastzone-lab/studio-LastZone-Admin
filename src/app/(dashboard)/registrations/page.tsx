@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { columns, Registration } from './columns';
@@ -16,50 +16,48 @@ export default function RegistrationsPage() {
   const searchParams = useSearchParams();
   const tournamentId = searchParams.get('tournament_id');
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        // Fetch from 'registrations' (Tournament level)
-        let query = supabase
-          .from('registrations')
-          .select(`
-            id, created_at, status, player_details,
-            tournaments ( name, game_type ),
-            profiles ( username, avatar_url, in_game_name, bgmi_id, email, phone )
-          `)
-          .order('created_at', { ascending: false });
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      // Fetch from 'registrations' (Tournament level)
+      let query = supabase
+        .from('registrations')
+        .select(`
+          id, created_at, status, player_details,
+          tournaments ( name, game_type ),
+          profiles ( username, avatar_url, in_game_name, bgmi_id, email, phone )
+        `)
+        .order('created_at', { ascending: false });
 
-        if (tournamentId) {
-          query = query.eq('tournament_id', tournamentId);
-        }
-
-        const { data: tournamentRegs, error: tError } = await query;
-
-        if (tError) throw tError;
-
-        console.log('Fetched Registrations:', tournamentRegs);
-
-        const formattedData = (tournamentRegs as any[])?.map(r => ({
-          ...r,
-          source: 'Tournament'
-        })) || [];
-
-        setData(formattedData);
-
-      } catch (error: any) {
-        toast({
-          title: 'Error fetching registrations',
-          description: error.message,
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
+      if (tournamentId) {
+        query = query.eq('tournament_id', tournamentId);
       }
-    }
 
+      const { data: tournamentRegs, error: tError } = await query;
+
+      if (tError) throw tError;
+
+      const formattedData = (tournamentRegs as any[])?.map(r => ({
+        ...r,
+        source: 'Tournament'
+      })) || [];
+
+      setData(formattedData);
+
+    } catch (error: any) {
+      toast({
+        title: 'Error fetching registrations',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, tournamentId, toast]);
+
+  useEffect(() => {
     fetchData();
-  }, [supabase, toast]);
+  }, [fetchData]);
 
   if (loading) {
     return <div className="p-8">Loading registrations...</div>;
@@ -73,7 +71,7 @@ export default function RegistrationsPage() {
       />
 
       <div className="container mx-auto py-10">
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} data={data} onRefresh={fetchData} />
       </div>
     </div>
   );

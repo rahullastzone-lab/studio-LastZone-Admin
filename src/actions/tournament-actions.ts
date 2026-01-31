@@ -18,3 +18,22 @@ export async function closeTournament(id: string) {
     revalidatePath('/tournaments');
     return { success: true };
 }
+
+export async function updateRoomDetails(id: string, roomId: string, roomPass: string) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from('tournaments')
+        .update({
+            room_id: roomId,
+            room_password: roomPass,
+        })
+        .eq('id', id);
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    revalidatePath('/tournaments');
+    return { success: true };
+}

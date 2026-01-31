@@ -48,7 +48,8 @@ export type Registration = {
 
 const getPlayerId = (player: any) => {
   if (!player) return '-';
-  return player.player_id || player.bgmi_id || player.game_id || player.uid || player.id || '-';
+  // Check all possible casing variations found in different app versions
+  return player.playerId || player.player_id || player.bgmi_id || player.game_id || player.uid || player.id || player.playerID || '-';
 };
 
 export const columns: ColumnDef<Registration>[] = [

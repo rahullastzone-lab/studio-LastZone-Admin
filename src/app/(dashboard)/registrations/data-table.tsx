@@ -28,11 +28,13 @@ import { Input } from "@/components/ui/input"
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    onRefresh?: () => void
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    onRefresh,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -57,7 +59,7 @@ export function DataTable<TData, TValue>({
 
     return (
         <div>
-            <div className="flex items-center py-4">
+            <div className="flex items-center justify-between py-4">
                 <Input
                     placeholder="Filter by user..."
                     value={(table.getColumn("user")?.getFilterValue() as string) ?? ""}
@@ -66,6 +68,11 @@ export function DataTable<TData, TValue>({
                     }
                     className="max-w-sm"
                 />
+                {onRefresh && (
+                    <Button variant="outline" size="sm" onClick={onRefresh}>
+                        Refresh
+                    </Button>
+                )}
             </div>
             <div className="rounded-md border">
                 <Table>
