@@ -1,4 +1,4 @@
--- 1. Ensure pg_cron is enabled (You've already done this!)
+-- 1. Ensure pg_cron is enabled
 -- create extension if not exists pg_cron;
 
 -- 2. Create the function to generate daily tournaments
@@ -10,12 +10,12 @@ declare
   start_hour integer;
   now_date date := current_date; -- Get current date
   tournament_time timestamptz;
-  -- Default settings for the auto-tournaments (Adjust these as needed)
-  default_game_name text := 'BGMI'; -- Change to your preferred default game
+  -- Default settings
+  default_game_name text := 'BGMI'; 
   default_map text := 'Erangel';
   default_mode text := 'Solo';
-  default_entry_fee numeric := 10;
-  default_prize_pool numeric := 500;
+  default_entry_fee numeric := 25;
+  default_prize_pool numeric := 750;
   default_per_kill numeric := 5;
 begin
   -- Fetch the Game ID for the default game (e.g., BGMI)
@@ -35,7 +35,8 @@ begin
     insert into public.tournaments (
       name,
       game_id,
-      game_type,
+      game_type, -- Stores Game Name (e.g., BGMI) as per frontend logic
+      mode,      -- Stores Mode (e.g., Solo) as per frontend logic
       map,
       entry_fee,
       prize_pool,
@@ -45,9 +46,10 @@ begin
       category,
       is_coming_soon
     ) values (
-      'Daily Solo Blast ' || to_char(tournament_time, 'HH12 AM'), -- e.g., "Daily Solo Blast 02 PM"
+      'BATTLEGROUND MOBILE INDIA',
       game_record.id,
-      default_game_name,
+      default_game_name, -- 'BGMI'
+      default_mode,      -- 'Solo'
       default_map,
       default_entry_fee,
       default_prize_pool,
@@ -69,28 +71,17 @@ begin
       t_id,
       tournament_time,
       'Scheduled',
-      '', -- Empty Room ID initially
-      ''  -- Empty Password initially
+      '', 
+      '' 
     );
     
   end loop;
 end;
 $$ language plpgsql;
 
--- 3. Schedule the function to run every day at 12:00 AM IST
--- We use a CRON expression for this.
--- If your database is in UTC (which Supabase usually is), 12:00 AM IST = 6:30 PM UTC previous day.
--- So we generally schedule it for 18:30 UTC.
--- '30 18 * * *' means "At 18:30 every day".
-
+-- 3. Schedule function (Runs every day at 12:00 AM IST / 18:30 UTC)
 select cron.schedule(
-  'generate-daily-tournaments', -- Job name (must be unique)
-  '30 18 * * *',                -- Schedule (18:30 UTC = 00:00 IST)
-  'select public.generate_daily_tournaments()' -- SQL command to run
+  'generate-daily-tournaments',
+  '30 18 * * *',
+  'select public.generate_daily_tournaments()'
 );
-
--- 4. (Optional) Run once immediately for TESTING
--- select public.generate_daily_tournaments();
-
--- 5. Verify it's scheduled
-select * from cron.job;
