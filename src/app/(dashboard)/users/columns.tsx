@@ -86,6 +86,14 @@ export const columns = ({ onBanToggle, onMoneyAction }: ColumnProps): ColumnDef<
     },
   },
   {
+    accessorKey: 'phone',
+    header: 'Mobile Number',
+    cell: ({ row }) => {
+      const phone = row.getValue('phone') as string;
+      return <div className="text-sm">{phone || 'N/A'}</div>;
+    },
+  },
+  {
     accessorKey: 'isAdmin',
     header: 'Role',
     cell: ({ row }) => {

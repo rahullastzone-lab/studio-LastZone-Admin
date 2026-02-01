@@ -8,7 +8,9 @@ declare
   game_record record;
   t_id uuid;
   start_hour integer;
-  now_date date := current_date; -- Get current date
+  -- FIX: Use IST Date instead of UTC Date
+  -- At 18:30 UTC, it is still the previous day in UTC, but next day (12:00 AM) in IST.
+  now_date date := (now() AT TIME ZONE 'Asia/Kolkata')::date; 
   tournament_time timestamptz;
   -- Default settings
   default_game_name text := 'BGMI'; 
@@ -28,15 +30,16 @@ begin
 
   -- Loop through 0 to 22 (Every 2 hours: 0, 2, 4, ..., 22)
   for start_hour in 0..22 by 2 loop
-    -- Calculate the timestamp for today at specific hour
+    -- Calculate the timestamp for the target date at specific hour
+    -- We construct the timestamp explicitly for the target date
     tournament_time := now_date + make_interval(hours => start_hour);
 
     -- Insert Tournament
     insert into public.tournaments (
       name,
       game_id,
-      game_type, -- Stores Game Name (e.g., BGMI) as per frontend logic
-      mode,      -- Stores Mode (e.g., Solo) as per frontend logic
+      game_type, -- Stores Game Name (e.g., BGMI)
+      mode,      -- Stores Mode (e.g., Solo)
       map,
       entry_fee,
       prize_pool,
