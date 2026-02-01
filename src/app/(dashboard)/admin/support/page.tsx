@@ -219,7 +219,7 @@ export default function SupportPage() {
                                                 </div>
                                             )}
 
-                                            {msg.content && (
+                                            {msg.content && msg.content !== 'No caption' && (
                                                 <p className="text-sm text-foreground whitespace-pre-wrap">
                                                     {msg.content}
                                                 </p>
