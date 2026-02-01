@@ -23,6 +23,7 @@ import {
   UserPlus,
   Briefcase,
   MonitorPlay,
+  MessageSquare,
 } from 'lucide-react';
 
 const AppSidebar = () => {
@@ -44,6 +45,7 @@ const AppSidebar = () => {
     { href: '/notify-subscribers', label: 'Notify Subscribers', icon: UserPlus },
     { href: '/services', label: 'Services', icon: Briefcase },
     { href: '/streams', label: 'Live Streams', icon: MonitorPlay },
+    { href: '/admin/support', label: 'Telegram Support', icon: MessageSquare },
   ];
 
   return (
