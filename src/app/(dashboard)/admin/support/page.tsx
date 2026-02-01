@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -32,78 +32,70 @@ export default function SupportPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Fetch Users
+    // Use a ref for selectedUser to access current value inside setInterval closure
+    const selectedUserRef = useRef<TelegramUser | null>(null);
+
     useEffect(() => {
-        async function fetchUsers() {
-            try {
-                const { data, error } = await supabase
-                    .from('telegram_users')
-                    .select('*')
-                    .order('first_name', { ascending: true });
+        selectedUserRef.current = selectedUser;
+    }, [selectedUser]);
 
-                if (error) throw error;
-                setUsers(data || []);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-            } finally {
-                setIsLoadingUsers(false);
-            }
+    const fetchUsers = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('telegram_users')
+                .select('*')
+                .order('first_name', { ascending: true });
+
+            if (error) throw error;
+            setUsers(data || []);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setIsLoadingUsers(false);
         }
+    };
 
+    const fetchMessages = async (userId: number, showLoader = false) => {
+        if (showLoader) setIsLoadingMessages(true);
+        try {
+            const { data, error } = await supabase
+                .from('support_messages')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            setMessages(data || []);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        } finally {
+            if (showLoader) setIsLoadingMessages(false);
+        }
+    };
+
+    // Initial Load and Polling
+    useEffect(() => {
         fetchUsers();
 
-        // Subscribe to new users (Optional but good for real-time)
-        const channel = supabase
-            .channel('telegram_users_changes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'telegram_users' }, () => {
-                fetchUsers();
-            })
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [supabase]);
-
-    // Fetch Messages for Selected User
-    useEffect(() => {
-        if (!selectedUser) return;
-
-        async function fetchMessages() {
-            setIsLoadingMessages(true);
-            try {
-                const { data, error } = await supabase
-                    .from('support_messages')
-                    .select('*')
-                    .eq('user_id', selectedUser?.id)
-                    .order('created_at', { ascending: true });
-
-                if (error) throw error;
-                setMessages(data || []);
-            } catch (error) {
-                console.error('Error fetching messages:', error);
-            } finally {
-                setIsLoadingMessages(false);
+        const interval = setInterval(() => {
+            fetchUsers();
+            if (selectedUserRef.current) {
+                // Pass false to not show loader during background refresh
+                fetchMessages(selectedUserRef.current.id, false);
             }
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Fetch when user is selected
+    useEffect(() => {
+        if (selectedUser) {
+            fetchMessages(selectedUser.id, true);
+        } else {
+            setMessages([]);
         }
-
-        fetchMessages();
-
-        // Subscribe to new messages for this user
-        const channel = supabase
-            .channel(`messages_${selectedUser.id}`)
-            .on('postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `user_id=eq.${selectedUser.id}` },
-                (payload) => {
-                    setMessages((prev) => [...prev, payload.new as SupportMessage]);
-                }
-            )
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [selectedUser, supabase]);
+    }, [selectedUser]);
 
     // Scroll to bottom on new message
     useEffect(() => {
@@ -218,9 +210,6 @@ export default function SupportPage() {
                                         <div className="bg-card border rounded-lg p-3 shadow-sm relative group">
                                             {msg.message_type === 'photo' && msg.file_url && (
                                                 <div className="mb-2 rounded-md overflow-hidden relative border min-w-[200px] min-h-[150px]">
-                                                    {/* Using standard img for external URLs if domain not configured in next.config, 
-                               but ideally we use Next Image. Since I don't know the supbabase storage domain, 
-                               I will use a standard img tag with safe fallbacks or unoptimized Image */}
                                                     <img
                                                         src={msg.file_url}
                                                         alt="User upload"
@@ -245,17 +234,10 @@ export default function SupportPage() {
                             )}
                         </div>
 
-                        {/* Input Area (Placeholder for now as this is a view-only interface for support) */}
+                        {/* Input Area (Read Only) */}
                         <div className="p-4 border-t bg-card">
                             <div className="flex items-center gap-2 text-muted-foreground text-sm italic">
-                                {/* 
-                  Note: The requirement was mainly to VIEW messages. 
-                  Replying back to Telegram would require a backend function/bot API integration 
-                  which wasn't explicitly requested in the Task description ("Show a list...", "Show their chat history...").
-                  The user asked to "Display this data", not "Reply". 
-                  So I will leave this as a read-only view for now, effectively.
-                */}
-                                <span className="p-2">Read-only view of Telegram messages.</span>
+                                <span className="p-2">Read-only view of Telegram messages. Auto-refreshes every 5s.</span>
                             </div>
                         </div>
                     </>
