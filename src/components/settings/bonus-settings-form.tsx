@@ -40,7 +40,7 @@ export function BonusSettingsForm() {
             const { data, error } = await supabase
                 .from('app_settings')
                 .select('*')
-                .in('setting_key', [
+                .in('key', [
                     'signup_bonus_default',
                     'signup_bonus_referral_user',
                     'signup_bonus_referral_referrer',
@@ -52,12 +52,12 @@ export function BonusSettingsForm() {
 
             if (data) {
                 data.forEach(setting => {
-                    switch (setting.setting_key) {
-                        case 'signup_bonus_default': setSignupBonusDefault(setting.setting_value); break;
-                        case 'signup_bonus_referral_user': setSignupBonusReferralUser(setting.setting_value); break;
-                        case 'signup_bonus_referral_referrer': setSignupBonusReferrer(setting.setting_value); break;
-                        case 'bonus_percent_classic': setBonusPercentClassic(setting.setting_value); break;
-                        case 'bonus_percent_tdm': setBonusPercentTdm(setting.setting_value); break;
+                    switch (setting.key) {
+                        case 'signup_bonus_default': setSignupBonusDefault(setting.value); break;
+                        case 'signup_bonus_referral_user': setSignupBonusReferralUser(setting.value); break;
+                        case 'signup_bonus_referral_referrer': setSignupBonusReferrer(setting.value); break;
+                        case 'bonus_percent_classic': setBonusPercentClassic(setting.value); break;
+                        case 'bonus_percent_tdm': setBonusPercentTdm(setting.value); break;
                     }
                 });
             }
@@ -78,14 +78,14 @@ export function BonusSettingsForm() {
         setSubmitting(true);
         try {
             const updates = [
-                { setting_key: 'signup_bonus_default', setting_value: signupBonusDefault, description: 'Bonus for new user without referral' },
-                { setting_key: 'signup_bonus_referral_user', setting_value: signupBonusReferralUser, description: 'Bonus for new user WITH referral' },
-                { setting_key: 'signup_bonus_referral_referrer', setting_value: signupBonusReferrer, description: 'Bonus for the referrer' },
-                { setting_key: 'bonus_percent_classic', setting_value: bonusPercentClassic, description: 'Max bonus % usable in Classic matches' },
-                { setting_key: 'bonus_percent_tdm', setting_value: bonusPercentTdm, description: 'Max bonus % usable in TDM matches' },
+                { key: 'signup_bonus_default', value: signupBonusDefault, description: 'Bonus for new user without referral' },
+                { key: 'signup_bonus_referral_user', value: signupBonusReferralUser, description: 'Bonus for new user WITH referral' },
+                { key: 'signup_bonus_referral_referrer', value: signupBonusReferrer, description: 'Bonus for the referrer' },
+                { key: 'bonus_percent_classic', value: bonusPercentClassic, description: 'Max bonus % usable in Classic matches' },
+                { key: 'bonus_percent_tdm', value: bonusPercentTdm, description: 'Max bonus % usable in TDM matches' },
             ];
 
-            const { error } = await supabase.from('app_settings').upsert(updates, { onConflict: 'setting_key' });
+            const { error } = await supabase.from('app_settings').upsert(updates, { onConflict: 'key' });
 
             if (error) throw error;
 

@@ -2,7 +2,9 @@ export type User = {
   id: string;
   username: string;
   email: string;
-  phone?: string;
+  phone?: string; // keeping for backward compatibility if needed, but we will prefer mobileNumber
+  mobileNumber?: string;
+  referralCode?: string;
   avatarUrl?: string;
   walletBalance: number;
   isAdmin: boolean;
@@ -37,6 +39,7 @@ export type Transaction = {
   type: 'Deposit' | 'Withdrawal' | 'Refund' | 'Winnings' | 'Entry Fee';
   status: 'Success' | 'Pending' | 'Failed';
   description?: string;
+  gateway_order_id?: string;
   created_at: string;
 };
 

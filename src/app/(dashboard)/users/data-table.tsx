@@ -40,6 +40,7 @@ export function DataTable<TData extends User, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [globalFilter, setGlobalFilter] = React.useState<string>("");
 
   const table = useReactTable({
     data,
@@ -50,9 +51,12 @@ export function DataTable<TData extends User, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: "includesString",
     state: {
       sorting,
       columnFilters,
+      globalFilter,
     },
     initialState: {
       pagination: {
@@ -65,10 +69,10 @@ export function DataTable<TData extends User, TValue>({
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder={`Search by ${searchKey}...`}
-          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
+          placeholder={`Search users...`}
+          value={(table.getState().globalFilter as string) ?? ''}
           onChange={(event) =>
-            table.getColumn(searchKey)?.setFilterValue(event.target.value)
+            table.setGlobalFilter(event.target.value)
           }
           className="max-w-sm"
         />
@@ -84,9 +88,9 @@ export function DataTable<TData extends User, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}

@@ -47,6 +47,7 @@ export default function FinancialsPage() {
         status: t.status,
         description: t.description,
         created_at: t.created_at,
+        gateway_order_id: t.gateway_order_id,
       }));
 
       setTransactions(mappedTransactions);
@@ -87,7 +88,7 @@ export default function FinancialsPage() {
           <WithdrawalRequests onRefresh={fetchData} />
         </TabsContent>
         <TabsContent value="transactions">
-          <TransactionLogs data={transactions} />
+          <TransactionLogs data={transactions} onRefresh={fetchData} />
         </TabsContent>
       </Tabs>
     </div>

@@ -29,6 +29,7 @@ export type User = UserType;
 type ColumnProps = {
   onBanToggle: (userId: string) => void;
   onMoneyAction: (user: User) => void;
+  onViewDetails?: (user: User) => void;
 };
 
 const statusVariant: {
@@ -38,7 +39,7 @@ const statusVariant: {
   Banned: 'destructive',
 };
 
-export const columns = ({ onBanToggle, onMoneyAction }: ColumnProps): ColumnDef<User>[] => [
+export const columns = ({ onBanToggle, onMoneyAction, onViewDetails }: ColumnProps): ColumnDef<User>[] => [
   {
     accessorKey: 'username',
     header: 'User',
@@ -86,11 +87,19 @@ export const columns = ({ onBanToggle, onMoneyAction }: ColumnProps): ColumnDef<
     },
   },
   {
-    accessorKey: 'phone',
+    accessorKey: 'mobileNumber',
     header: 'Mobile Number',
     cell: ({ row }) => {
-      const phone = row.getValue('phone') as string;
-      return <div className="text-sm">{phone || 'N/A'}</div>;
+      const mobile = row.original.mobileNumber || row.original.phone;
+      return <div className="text-sm">{mobile || 'N/A'}</div>;
+    },
+  },
+  {
+    accessorKey: 'referralCode',
+    header: 'Ref Code',
+    cell: ({ row }) => {
+      const code = row.original.referralCode;
+      return <div className="text-sm font-mono bg-muted/50 px-2 py-0.5 rounded w-fit">{code || '-'}</div>;
     },
   },
   {
@@ -153,6 +162,10 @@ export const columns = ({ onBanToggle, onMoneyAction }: ColumnProps): ColumnDef<
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => onViewDetails && onViewDetails(user)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              View Details
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onMoneyAction(user)}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add/Deduct Money

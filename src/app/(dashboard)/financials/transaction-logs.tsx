@@ -42,6 +42,11 @@ import { format, parseISO } from 'date-fns';
 import ClientDate from '@/components/ui/client-date';
 import { ArrowUpDown } from 'lucide-react';
 
+import { verifyPayment } from '@/app/actions/verify-payment';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, CheckCircle, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
   Success: 'default',
   success: 'default',
@@ -74,6 +79,57 @@ const typeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   match_win: 'default',
 };
 
+// Inline Verify Button Component
+const VerifyTransactionButton = ({ transaction, onRefresh }: { transaction: Transaction; onRefresh?: () => void }) => {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleVerify = async () => {
+    if (!transaction.gateway_order_id) {
+      toast({ title: 'Cannot Verify', description: 'No Gateway Order ID found.', variant: 'destructive' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await verifyPayment(transaction.id, transaction.gateway_order_id);
+
+      toast({
+        title: result.success ? (result.updatedStatus === 'Success' ? 'Payment Verified' : 'Check Complete') : 'Verification Failed',
+        description: result.message,
+        variant: result.success ? (result.updatedStatus === 'Success' ? 'default' : 'default') : 'destructive',
+      });
+
+      if (result.success && onRefresh) {
+        onRefresh();
+      }
+
+    } catch (error) {
+      toast({ title: 'Error', description: 'Unknown error occurred.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Only show if Pending and has gateway_order_id
+  if (transaction.status !== 'Pending' || !transaction.gateway_order_id) {
+    return null;
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="xs"
+      className="ml-2 h-6 px-2 text-xs gap-1"
+      onClick={handleVerify}
+      disabled={loading}
+    >
+      {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+      Verify
+    </Button>
+  );
+};
+
 export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'username',
@@ -97,14 +153,16 @@ export const columns: ColumnDef<Transaction>[] = [
       const formatted = new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
       }).format(amount);
       return (
         <div
           className={
             amount > 0
-              ? 'text-green-500'
+              ? 'text-green-500 font-medium'
               : amount < 0
-                ? 'text-red-500'
+                ? 'text-red-500 font-medium'
                 : ''
           }
         >
@@ -125,15 +183,22 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: 'created_at',
     header: 'Date',
     cell: ({ row }) => {
-      return <ClientDate date={row.getValue('created_at')} formatString="PPpp" />;
+      return <ClientDate date={row.getValue('created_at')} formatString="MMM d, p" />;
     },
   },
   {
     accessorKey: 'status',
     header: 'Status',
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const status = row.getValue('status') as Transaction['status'];
-      return <Badge variant={statusVariant[status]}>{status}</Badge>;
+      const meta = table.options.meta as { onRefresh?: () => void } | undefined;
+
+      return (
+        <div className="flex items-center gap-2">
+          <Badge variant={statusVariant[status]}>{status}</Badge>
+          <VerifyTransactionButton transaction={row.original} onRefresh={meta?.onRefresh} />
+        </div>
+      );
     },
   },
   {
@@ -168,12 +233,12 @@ export const columns: ColumnDef<Transaction>[] = [
           )
         }
       }
-      return <span className="text-sm text-muted-foreground">{description}</span>;
+      return <span className="text-sm text-muted-foreground max-w-[200px] truncate block" title={description}>{description}</span>;
     },
   },
 ];
 
-export default function TransactionLogs({ data }: { data: Transaction[] }) {
+export default function TransactionLogs({ data, onRefresh }: { data: Transaction[]; onRefresh?: () => void }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -191,6 +256,9 @@ export default function TransactionLogs({ data }: { data: Transaction[] }) {
     state: {
       sorting,
       columnFilters,
+    },
+    meta: {
+      onRefresh,
     },
     initialState: {
       pagination: {

@@ -3,10 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 // Helper to get ZapUPI keys from DB
 export async function getZapUPIKeys() {
     const supabase = await createClient();
-    const { data } = await supabase.from('app_settings').select('*').in('setting_key', ['ZAPUPI_TOKEN_KEY', 'ZAPUPI_SECRET_KEY']);
+    const { data } = await supabase.from('app_settings').select('*').in('key', ['ZAPUPI_TOKEN_KEY', 'ZAPUPI_SECRET_KEY']);
 
-    const token = data?.find(s => s.setting_key === 'ZAPUPI_TOKEN_KEY')?.setting_value;
-    const secret = data?.find(s => s.setting_key === 'ZAPUPI_SECRET_KEY')?.setting_value;
+    const token = data?.find(s => s.key === 'ZAPUPI_TOKEN_KEY')?.value;
+    const secret = data?.find(s => s.key === 'ZAPUPI_SECRET_KEY')?.value;
 
     if (!token || !secret) {
         throw new Error('ZapUPI keys are not configured in App Settings.');

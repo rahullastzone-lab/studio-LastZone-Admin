@@ -54,25 +54,25 @@ export default function AppSettingsPage() {
 
       if (data) {
         data.forEach(setting => {
-          if (setting.setting_key === 'app_name') setAppName(setting.setting_value);
-          if (setting.setting_key === 'support_email') setSupportEmail(setting.setting_value);
-          if (setting.setting_key === 'maintenance_mode') setMaintenanceMode(setting.setting_value === 'true');
+          if (setting.key === 'app_name') setAppName(setting.value);
+          if (setting.key === 'support_email') setSupportEmail(setting.value);
+          if (setting.key === 'maintenance_mode') setMaintenanceMode(setting.value === 'true');
 
           // Payment Settings
-          if (setting.setting_key === 'ZAPUPI_TOKEN_KEY') setZapupiToken(setting.setting_value);
-          if (setting.setting_key === 'ZAPUPI_SECRET_KEY') setZapupiSecret(setting.setting_value);
+          if (setting.key === 'ZAPUPI_TOKEN_KEY') setZapupiToken(setting.value);
+          if (setting.key === 'ZAPUPI_SECRET_KEY') setZapupiSecret(setting.value);
 
           // Social Media
-          if (setting.setting_key === 'social_instagram') setInstagramUrl(setting.setting_value);
-          if (setting.setting_key === 'social_facebook') setFacebookUrl(setting.setting_value);
-          if (setting.setting_key === 'social_twitter') setTwitterUrl(setting.setting_value);
-          if (setting.setting_key === 'social_youtube') setYoutubeUrl(setting.setting_value);
+          if (setting.key === 'social_instagram') setInstagramUrl(setting.value);
+          if (setting.key === 'social_facebook') setFacebookUrl(setting.value);
+          if (setting.key === 'social_twitter') setTwitterUrl(setting.value);
+          if (setting.key === 'social_youtube') setYoutubeUrl(setting.value);
 
-          if (setting.setting_key === 'social_discord') setDiscordUrl(setting.setting_value);
+          if (setting.key === 'social_discord') setDiscordUrl(setting.value);
 
           // Branding
-          if (setting.setting_key === 'logo_header') setHeaderLogoUrl(setting.setting_value);
-          if (setting.setting_key === 'logo_footer') setFooterLogoUrl(setting.setting_value);
+          if (setting.key === 'logo_header') setHeaderLogoUrl(setting.value);
+          if (setting.key === 'logo_footer') setFooterLogoUrl(setting.value);
         });
       }
     } catch (error: any) {
@@ -89,28 +89,28 @@ export default function AppSettingsPage() {
   const handleSaveChanges = async () => {
     try {
       const updates = [
-        { setting_key: 'app_name', setting_value: appName, description: 'Global Application Name' },
-        { setting_key: 'support_email', setting_value: supportEmail, description: 'Contact Email for Support' },
-        { setting_key: 'maintenance_mode', setting_value: String(maintenanceMode), description: 'Enable/Disable App Access' },
+        { key: 'app_name', value: appName, description: 'Global Application Name' },
+        { key: 'support_email', value: supportEmail, description: 'Contact Email for Support' },
+        { key: 'maintenance_mode', value: String(maintenanceMode), description: 'Enable/Disable App Access' },
 
         // Payment Settings
-        { setting_key: 'ZAPUPI_TOKEN_KEY', setting_value: zapupiToken, description: 'ZapUPI Token Key' },
-        { setting_key: 'ZAPUPI_SECRET_KEY', setting_value: zapupiSecret, description: 'ZapUPI Secret Key' },
+        { key: 'ZAPUPI_TOKEN_KEY', value: zapupiToken, description: 'ZapUPI Token Key' },
+        { key: 'ZAPUPI_SECRET_KEY', value: zapupiSecret, description: 'ZapUPI Secret Key' },
 
         // Social Media
-        { setting_key: 'social_instagram', setting_value: instagramUrl, description: 'Instagram URL' },
-        { setting_key: 'social_facebook', setting_value: facebookUrl, description: 'Facebook URL' },
-        { setting_key: 'social_twitter', setting_value: twitterUrl, description: 'Twitter/X URL' },
-        { setting_key: 'social_youtube', setting_value: youtubeUrl, description: 'YouTube URL' },
+        { key: 'social_instagram', value: instagramUrl, description: 'Instagram URL' },
+        { key: 'social_facebook', value: facebookUrl, description: 'Facebook URL' },
+        { key: 'social_twitter', value: twitterUrl, description: 'Twitter/X URL' },
+        { key: 'social_youtube', value: youtubeUrl, description: 'YouTube URL' },
 
-        { setting_key: 'social_discord', setting_value: discordUrl, description: 'Discord URL' },
+        { key: 'social_discord', value: discordUrl, description: 'Discord URL' },
 
         // Branding
-        { setting_key: 'logo_header', setting_value: headerLogoUrl, description: 'Header Logo URL' },
-        { setting_key: 'logo_footer', setting_value: footerLogoUrl, description: 'Footer Logo URL' },
+        { key: 'logo_header', value: headerLogoUrl, description: 'Header Logo URL' },
+        { key: 'logo_footer', value: footerLogoUrl, description: 'Footer Logo URL' },
       ];
 
-      const { error } = await supabase.from('app_settings').upsert(updates, { onConflict: 'setting_key' });
+      const { error } = await supabase.from('app_settings').upsert(updates, { onConflict: 'key' });
 
       if (error) throw error;
 

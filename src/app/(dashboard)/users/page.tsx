@@ -27,6 +27,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const { toast } = useToast();
   const [moneyModalUser, setMoneyModalUser] = useState<User | null>(null);
+  const [viewUser, setViewUser] = useState<User | null>(null);
   const [amount, setAmount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -56,7 +57,9 @@ export default function UsersPage() {
         id: u.id,
         username: u.username,
         email: u.email,
-        phone: u.phone,
+        phone: u.phone, // Legacy field
+        mobileNumber: u.mobile_number, // New field
+        referralCode: u.referral_code, // New field
         avatarUrl: u.avatar_url,
         walletBalance: u.wallet_balance || 0,
         isAdmin: u.is_admin,
@@ -188,7 +191,11 @@ export default function UsersPage() {
   };
 
 
-  const columns = columnDef({ onBanToggle: handleBanToggle, onMoneyAction: handleOpenMoneyDialog });
+  const columns = columnDef({
+    onBanToggle: handleBanToggle,
+    onMoneyAction: handleOpenMoneyDialog,
+    onViewDetails: (user) => setViewUser(user)
+  });
 
   if (isLoading && users.length === 0) {
     return <div>Loading users...</div>;
@@ -223,6 +230,7 @@ export default function UsersPage() {
         </TabsContent>
       </Tabs>
 
+      {/* Money Dialog */}
       <Dialog open={!!moneyModalUser} onOpenChange={(isOpen) => !isOpen && setMoneyModalUser(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -255,6 +263,7 @@ export default function UsersPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Add User Dialog */}
       <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -302,6 +311,62 @@ export default function UsersPage() {
             <Button onClick={handleCreateUser} disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Create User'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Details Dialog */}
+      <Dialog open={!!viewUser} onOpenChange={(isOpen) => !isOpen && setViewUser(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {viewUser && (
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center text-xl font-bold">
+                  {viewUser.username.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">{viewUser.username}</h3>
+                  <p className="text-sm text-muted-foreground">{viewUser.email}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="text-sm font-medium text-muted-foreground">Mobile Number</span>
+                  <p className="text-sm font-semibold">{viewUser.mobileNumber || viewUser.phone || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium text-muted-foreground">Referral Code</span>
+                  <p className="text-sm font-semibold">{viewUser.referralCode || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium text-muted-foreground">Wallet Balance</span>
+                  <p className="text-sm font-semibold">₹{viewUser.walletBalance.toFixed(2)}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium text-muted-foreground">Status</span>
+                  <p className="text-sm font-semibold">{viewUser.status}</p>
+                </div>
+                {viewUser.instagram_link && (
+                  <div className="space-y-1 col-span-2">
+                    <span className="text-sm font-medium text-muted-foreground">Instagram</span>
+                    <p className="text-sm truncate"><a href={viewUser.instagram_link} target="_blank" className="text-blue-500 hover:underline">{viewUser.instagram_link}</a></p>
+                  </div>
+                )}
+                {viewUser.youtube_link && (
+                  <div className="space-y-1 col-span-2">
+                    <span className="text-sm font-medium text-muted-foreground">YouTube</span>
+                    <p className="text-sm truncate"><a href={viewUser.youtube_link} target="_blank" className="text-blue-500 hover:underline">{viewUser.youtube_link}</a></p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setViewUser(null)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
