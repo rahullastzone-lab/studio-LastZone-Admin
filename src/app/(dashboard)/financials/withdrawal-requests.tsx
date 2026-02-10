@@ -201,7 +201,7 @@ export default function WithdrawalRequests({ onRefresh }: { onRefresh: () => voi
       accessorKey: 'description',
       header: 'Details',
       cell: ({ row }) => (
-        <div className="max-w-[200px] truncate text-muted-foreground" title={row.original.description}>
+        <div className="text-muted-foreground" title={row.original.description}>
           {row.original.description || '-'}
         </div>
       ),
