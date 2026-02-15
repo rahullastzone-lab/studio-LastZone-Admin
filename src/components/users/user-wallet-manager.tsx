@@ -113,7 +113,7 @@ export function UserWalletManager() {
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
     const [isManageOpen, setIsManageOpen] = useState(false);
-    const [manageType, setManageType] = useState<'wallet_balance' | 'winnings' | 'bonus'>('wallet_balance');
+    const [manageType, setManageType] = useState<'wallet_balance' | 'winnings' | 'bonus' | 'refund'>('wallet_balance');
     const [actionType, setActionType] = useState<'add' | 'deduct'>('add');
     const [amount, setAmount] = useState('');
     const [reason, setReason] = useState('');
@@ -258,7 +258,7 @@ export function UserWalletManager() {
 
         try {
             // Determine the actual column name in the database/profile object
-            const columnToUpdate = manageType;
+            const columnToUpdate = manageType === 'refund' ? 'wallet_balance' : manageType;
 
             // Safe access using the mapped key
             const currentVal = selectedUser[columnToUpdate] || 0;
@@ -289,8 +289,10 @@ export function UserWalletManager() {
                 .insert({
                     user_id: selectedUser.id,
                     amount: numAmount,
-                    type: actionType === 'add' ? 'admin_credit' : 'admin_debit',
-                    description: `Admin Adjustment (${manageType}): ${reason} - ${actionType === 'add' ? 'Added' : 'Deducted'} ${numAmount}`,
+                    type: manageType === 'refund' ? 'Refund' : (actionType === 'add' ? 'admin_credit' : 'admin_debit'),
+                    description: manageType === 'refund'
+                        ? `Refund Processed: ${reason} - Credited ${numAmount}`
+                        : `Admin Adjustment (${manageType}): ${reason} - ${actionType === 'add' ? 'Added' : 'Deducted'} ${numAmount}`,
                     status: 'completed'
                 });
 
@@ -522,6 +524,15 @@ export function UserWalletManager() {
                                     className={manageType === 'bonus' ? 'bg-blue-600 hover:bg-blue-700' : ''}
                                 >
                                     Bonus
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    type="button"
+                                    variant={manageType === 'refund' ? 'default' : 'outline'}
+                                    onClick={() => { setManageType('refund'); setActionType('add'); }}
+                                    className={manageType === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                                >
+                                    Refund
                                 </Button>
                             </div>
                         </div>
