@@ -53,6 +53,17 @@ export default function UsersPage() {
         variant: "destructive"
       });
     } else if (data) {
+      // 1. Calculate Referral Counts
+      const referralCounts = new Map<string, number>();
+
+      data.forEach((u: any) => {
+        if (u.referred_by) {
+          // Provide a default value of 0 if undefined
+          const currentCount = referralCounts.get(u.referred_by) || 0;
+          referralCounts.set(u.referred_by, currentCount + 1);
+        }
+      });
+
       const mappedUsers: User[] = data.map((u: any) => ({
         id: u.id,
         username: u.username,
@@ -60,6 +71,7 @@ export default function UsersPage() {
         phone: u.phone, // Legacy field
         mobileNumber: u.mobile_number, // New field
         referralCode: u.referral_code, // New field
+        referralCount: referralCounts.get(u.referral_code) || 0, // Map count using referral code
         avatarUrl: u.avatar_url,
         walletBalance: u.wallet_balance || 0,
         isAdmin: u.is_admin,

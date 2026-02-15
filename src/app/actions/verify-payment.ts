@@ -10,7 +10,7 @@ export type VerifyPaymentResult = {
 };
 
 export async function verifyPayment(transactionId: string, gatewayOrderId: string): Promise<VerifyPaymentResult> {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     try {
         // 1. Get Keys (Reuse existing helper)

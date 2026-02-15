@@ -11,6 +11,7 @@ export type User = {
   status?: 'Active' | 'Banned';
   instagram_link?: string;
   youtube_link?: string;
+  referralCount?: number;
 };
 
 export type Tournament = {

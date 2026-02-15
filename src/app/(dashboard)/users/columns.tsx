@@ -103,6 +103,30 @@ export const columns = ({ onBanToggle, onMoneyAction, onViewDetails }: ColumnPro
     },
   },
   {
+    accessorKey: 'referralCount',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Referrals
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const count = row.original.referralCount || 0;
+      return (
+        <div className="flex items-center justify-center">
+          <Badge variant="secondary" className="font-mono">
+            {count}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: 'isAdmin',
     header: 'Role',
     cell: ({ row }) => {
