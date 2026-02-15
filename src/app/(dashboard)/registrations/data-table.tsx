@@ -24,6 +24,13 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -60,14 +67,37 @@ export function DataTable<TData, TValue>({
     return (
         <div>
             <div className="flex items-center justify-between py-4">
-                <Input
-                    placeholder="Filter by user..."
-                    value={(table.getColumn("user")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("user")?.setFilterValue(event.target.value)
-                    }
-                    className="max-w-sm"
-                />
+                <div className="flex items-center gap-2">
+                    <Input
+                        placeholder="Filter by user..."
+                        value={(table.getColumn("user")?.getFilterValue() as string) ?? ""}
+                        onChange={(event) =>
+                            table.getColumn("user")?.setFilterValue(event.target.value)
+                        }
+                        className="max-w-sm"
+                    />
+                    <div className="flex bg-muted p-1 rounded-md">
+                        {["all", "Solo", "Duo", "Squad"].map((mode) => {
+                            const currentFilter = (table.getColumn("mode")?.getFilterValue() as string) ?? "all";
+                            const isActive = currentFilter === (mode === "all" ? "" : mode) || (mode === "all" && !currentFilter);
+
+                            return (
+                                <button
+                                    key={mode}
+                                    onClick={() => table.getColumn("mode")?.setFilterValue(mode === "all" ? "" : mode)}
+                                    className={`
+                                        px-3 py-1.5 text-sm font-medium rounded-sm transition-all
+                                        ${isActive
+                                            ? "bg-background text-foreground shadow-sm"
+                                            : "text-muted-foreground hover:bg-background/50 hover:text-foreground"}
+                                    `}
+                                >
+                                    {mode === "all" ? "All" : mode}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </div>
                 {onRefresh && (
                     <Button variant="outline" size="sm" onClick={onRefresh}>
                         Refresh

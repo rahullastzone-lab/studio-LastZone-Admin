@@ -113,7 +113,7 @@ export function UserWalletManager() {
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
     const [isManageOpen, setIsManageOpen] = useState(false);
-    const [manageType, setManageType] = useState<'wallet_balance' | 'winnings' | 'bonus' | 'refund'>('refund');
+    const [manageType, setManageType] = useState<'wallet_balance' | 'winnings' | 'bonus'>('wallet_balance');
     const [actionType, setActionType] = useState<'add' | 'deduct'>('add');
     const [amount, setAmount] = useState('');
     const [reason, setReason] = useState('');
@@ -233,7 +233,7 @@ export function UserWalletManager() {
         if (e.key === 'Enter') handleSearch();
     }
 
-    const openManageDialog = (user: UserProfile, type: 'wallet_balance' | 'winnings' | 'bonus' | 'refund' = 'refund') => {
+    const openManageDialog = (user: UserProfile, type: 'wallet_balance' | 'winnings' | 'bonus' = 'wallet_balance') => {
         setSelectedUser(user);
         setManageType(type);
         setAmount('');
@@ -258,7 +258,7 @@ export function UserWalletManager() {
 
         try {
             // Determine the actual column name in the database/profile object
-            const columnToUpdate = manageType === 'refund' ? 'wallet_balance' : manageType;
+            const columnToUpdate = manageType;
 
             // Safe access using the mapped key
             const currentVal = selectedUser[columnToUpdate] || 0;
@@ -289,7 +289,7 @@ export function UserWalletManager() {
                 .insert({
                     user_id: selectedUser.id,
                     amount: numAmount,
-                    type: manageType === 'refund' ? 'refund' : (actionType === 'add' ? 'admin_credit' : 'admin_debit'),
+                    type: actionType === 'add' ? 'admin_credit' : 'admin_debit',
                     description: `Admin Adjustment (${manageType}): ${reason} - ${actionType === 'add' ? 'Added' : 'Deducted'} ${numAmount}`,
                     status: 'completed'
                 });
@@ -499,11 +499,11 @@ export function UserWalletManager() {
                                 <Button
                                     size="sm"
                                     type="button"
-                                    variant={manageType === 'refund' ? 'default' : 'outline'}
-                                    onClick={() => setManageType('refund')}
-                                    className={manageType === 'refund' ? 'bg-green-600 hover:bg-green-700' : ''}
+                                    variant={manageType === 'wallet_balance' ? 'default' : 'outline'}
+                                    onClick={() => setManageType('wallet_balance')}
+                                    className={manageType === 'wallet_balance' ? 'bg-green-600 hover:bg-green-700' : ''}
                                 >
-                                    Refund
+                                    Deposit
                                 </Button>
                                 <Button
                                     size="sm"

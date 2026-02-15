@@ -33,6 +33,7 @@ export type Registration = {
   tournaments: {
     name: string
     game_type: string
+    mode: string
   }
   profiles: {
     username: string
@@ -67,7 +68,15 @@ export const columns: ColumnDef<Registration>[] = [
       )
     },
     cell: ({ row }) => {
-      return new Date(row.original.created_at).toLocaleDateString()
+      return new Date(row.original.created_at).toLocaleString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      })
     },
   },
   {
@@ -80,6 +89,19 @@ export const columns: ColumnDef<Registration>[] = [
     }
   },
   {
+    id: "mode",
+    accessorFn: (row) => row.tournaments?.mode,
+    header: "Mode",
+    cell: ({ row }) => {
+      const mode = row.original.tournaments?.mode;
+      return (
+        <Badge variant="outline" className="capitalize">
+          {mode || '-'}
+        </Badge>
+      )
+    }
+  },
+  {
     accessorKey: "tournament",
     header: "Tournament",
     cell: ({ row }) => {
@@ -88,6 +110,7 @@ export const columns: ColumnDef<Registration>[] = [
         <div className="flex flex-col">
           <span className="font-medium">{t?.name || "Unknown"}</span>
           <span className="text-xs text-muted-foreground">{t?.game_type || "Solo"}</span>
+
         </div>
       )
     }

@@ -24,7 +24,7 @@ export default function RegistrationsPage() {
         .from('registrations')
         .select(`
           id, created_at, status, player_details,
-          tournaments ( name, game_type ),
+          tournaments ( name, game_type, mode ),
           profiles ( username, avatar_url, in_game_name, bgmi_id, email, phone )
         `)
         .order('created_at', { ascending: false });
