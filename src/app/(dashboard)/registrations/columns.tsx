@@ -34,6 +34,7 @@ export type Registration = {
     name: string
     game_type: string
     mode: string
+    entry_fee: number
   }
   profiles: {
     username: string
@@ -114,6 +115,23 @@ export const columns: ColumnDef<Registration>[] = [
         </div>
       )
     }
+  },
+  {
+    id: "payment_type",
+    accessorFn: (row) => row.tournaments?.entry_fee > 0 ? "Paid" : "Free",
+    header: "Fee Type",
+    cell: ({ row }) => {
+      const fee = row.original.tournaments?.entry_fee;
+      const isPaid = fee > 0;
+      return (
+        <Badge variant={isPaid ? "default" : "secondary"} className={isPaid ? "bg-green-600 hover:bg-green-700" : ""}>
+          {isPaid ? `Paid (₹${fee})` : "Free"}
+        </Badge>
+      )
+    },
+    filterFn: (row, id, value) => {
+      return value === "" ? true : row.getValue(id) === value;
+    },
   },
   {
     accessorKey: "user",

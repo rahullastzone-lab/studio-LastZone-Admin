@@ -97,6 +97,27 @@ export function DataTable<TData, TValue>({
                             )
                         })}
                     </div>
+                    <div className="flex bg-muted p-1 rounded-md">
+                        {["all", "Free", "Paid"].map((type) => {
+                            const currentFilter = (table.getColumn("payment_type")?.getFilterValue() as string) ?? "all";
+                            const isActive = currentFilter === (type === "all" ? "" : type) || (type === "all" && !currentFilter);
+
+                            return (
+                                <button
+                                    key={type}
+                                    onClick={() => table.getColumn("payment_type")?.setFilterValue(type === "all" ? "" : type)}
+                                    className={`
+                                        px-3 py-1.5 text-sm font-medium rounded-sm transition-all
+                                        ${isActive
+                                            ? "bg-background text-foreground shadow-sm"
+                                            : "text-muted-foreground hover:bg-background/50 hover:text-foreground"}
+                                    `}
+                                >
+                                    {type === "all" ? "All" : type}
+                                </button>
+                            )
+                        })}
+                    </div>
                 </div>
                 {onRefresh && (
                     <Button variant="outline" size="sm" onClick={onRefresh}>
