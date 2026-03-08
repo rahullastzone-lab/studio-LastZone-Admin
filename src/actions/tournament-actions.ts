@@ -37,3 +37,22 @@ export async function updateRoomDetails(id: string, roomId: string, roomPass: st
     revalidatePath('/tournaments');
     return { success: true };
 }
+
+export async function updateTournamentPrizes(
+    id: string,
+    prizes: { prize_1st: number, prize_2nd: number, prize_3rd: number, prize_4th: number, prize_5th: number }
+) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from('tournaments')
+        .update(prizes)
+        .eq('id', id);
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    revalidatePath('/tournaments');
+    return { success: true };
+}

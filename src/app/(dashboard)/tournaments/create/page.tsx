@@ -60,6 +60,11 @@ const formSchema = z
     // New fields
     category: z.enum(['Normal', 'Mega']).default('Normal'),
     is_coming_soon: z.boolean().default(false),
+    prize_1st: z.coerce.number().min(0).default(0),
+    prize_2nd: z.coerce.number().min(0).default(0),
+    prize_3rd: z.coerce.number().min(0).default(0),
+    prize_4th: z.coerce.number().min(0).default(0),
+    prize_5th: z.coerce.number().min(0).default(0),
   });
 
 // ... existing imports ...
@@ -107,6 +112,11 @@ export default function CreateTournamentPage() {
       roomPassword: '',
       category: 'Normal',
       is_coming_soon: false,
+      prize_1st: 0,
+      prize_2nd: 0,
+      prize_3rd: 0,
+      prize_4th: 0,
+      prize_5th: 0,
     },
   });
 
@@ -160,6 +170,11 @@ export default function CreateTournamentPage() {
           entry_fee: values.entry_fee,
           prize_pool: values.prize_pool,
           per_kill: values.per_kill,
+          prize_1st: values.prize_1st,
+          prize_2nd: values.prize_2nd,
+          prize_3rd: values.prize_3rd,
+          prize_4th: values.prize_4th,
+          prize_5th: values.prize_5th,
           start_time: startTimeISO,
           status: 'Open',
           category: values.category,
@@ -444,6 +459,72 @@ export default function CreateTournamentPage() {
                       <FormLabel>Per Kill Prize (INR)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g., 5" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="prize_1st"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>1st Prize (INR)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="prize_2nd"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>2nd Prize (INR)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="prize_3rd"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>3rd Prize (INR)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="prize_4th"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>4th Prize (INR)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="prize_5th"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>5th Prize (INR)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

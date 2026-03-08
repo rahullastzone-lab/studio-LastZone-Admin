@@ -30,6 +30,11 @@ export type Tournament = {
   joined_count?: number;
   category?: 'Normal' | 'Mega';
   is_coming_soon?: boolean;
+  prize_1st?: number;
+  prize_2nd?: number;
+  prize_3rd?: number;
+  prize_4th?: number;
+  prize_5th?: number;
 };
 
 export type Transaction = {
